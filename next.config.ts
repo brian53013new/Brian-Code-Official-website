@@ -7,7 +7,6 @@ const nextConfig: NextConfig = {
   },
   // 因為你的專案名為 3d-portfolio，GitHub Pages 會把它放在 /3d-portfolio/ 底下
   basePath: '/3d-portfolio',
-  assetPrefix: '/3d-portfolio',
 };
 
 export default nextConfig;
