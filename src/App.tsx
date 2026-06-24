@@ -410,6 +410,10 @@ const UpdateLogModal = ({ onClose, theme, lang }) => {
                 <span className="text-[#38BDF8] shrink-0">✦</span>
                 <span><strong>{lang === 'zh' ? '藝術天氣嚮導' : 'ArtWeather Muse 2.0'}：</strong>{lang === 'zh' ? '全新升級的天氣網站「ArtWeather Muse 2.0」正式收錄至作品集導覽中。將天氣數據與藝術完美結合，提供穿搭與氣象指引。' : 'The brand new weather site "ArtWeather Muse 2.0" has been officially added to the portfolio. It combines weather data with art to provide outfit and forecast guidance.'}</span>
               </li>
+              <li className="flex gap-4">
+                <span className="text-[#38BDF8] shrink-0">✦</span>
+                <span><strong>{lang === 'zh' ? '客服與問題回報' : 'Support Form'}：</strong>{lang === 'zh' ? '加入 Google 表單功能，幫助使用者解決填寫問題的困難，隨時回報任何遇到的錯誤或建議。' : 'Added a Google form reporting mechanism to help users solve problems and easily report any bugs or suggestions.'}</span>
+              </li>
             </ul>
           </div>
 
@@ -519,12 +523,22 @@ export default function Home() {
         {/* Footer */}
         <footer className={`p-6 text-center text-xs font-sans tracking-widest opacity-60 relative z-30 flex flex-col items-center gap-4 ${theme === "light" ? "border-t border-black/10" : "border-t border-white/10"}`}>
           <div>{ui.footer[lang]}</div>
-          <button 
-            onClick={() => setShowLog(true)}
-            className={`px-4 py-2 rounded-full border transition-colors ${theme === 'light' ? 'border-black/20 hover:bg-black/5' : 'border-white/20 hover:bg-white/10'}`}
-          >
-            {lang === 'zh' ? '查看更新日誌 (Changelog)' : 'View Update Log'}
-          </button>
+          <div className="flex gap-4 items-center">
+            <button 
+              onClick={() => setShowLog(true)}
+              className={`px-4 py-2 rounded-full border transition-colors ${theme === 'light' ? 'border-black/20 hover:bg-black/5' : 'border-white/20 hover:bg-white/10'}`}
+            >
+              {lang === 'zh' ? '查看更新日誌 (Changelog)' : 'View Update Log'}
+            </button>
+            <a 
+              href="https://forms.gle/6UxbjJfYSMPx9qpJ7"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`px-4 py-2 rounded-full border transition-colors ${theme === 'light' ? 'border-[#38BDF8] text-[#38BDF8] hover:bg-[#38BDF8]/10' : 'border-[#38BDF8] text-[#38BDF8] hover:bg-[#38BDF8]/20'}`}
+            >
+              {lang === 'zh' ? '問題回報 (Report Issue)' : 'Report Issue'}
+            </a>
+          </div>
         </footer>
 
         {/* Theme Toggle Button */}
