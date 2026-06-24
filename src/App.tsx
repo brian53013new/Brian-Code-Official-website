@@ -364,12 +364,60 @@ const DetailView = ({ lang, ui, onBack, theme }) => {
   );
 };
 
+// 4. Update Log Modal
+const UpdateLogModal = ({ onClose, theme, lang }) => {
+  return (
+    <motion.div 
+      className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm font-sans"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+    >
+      <motion.div 
+        className={`relative w-full max-w-2xl p-8 md:p-12 border shadow-2xl overflow-hidden ${theme === 'light' ? 'bg-[#F4F1EA] border-black/20 text-[#333]' : 'bg-[#121212] border-[#38BDF8]/30 text-white'}`}
+        initial={{ scale: 0.9, y: 20 }}
+        animate={{ scale: 1, y: 0 }}
+        exit={{ scale: 0.9, y: 20 }}
+      >
+        {/* Decorative Grid */}
+        <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 50% 50%, #38BDF8 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
+        
+        <button onClick={onClose} className="absolute top-6 right-6 text-2xl opacity-50 hover:opacity-100 transition-opacity z-10">&times;</button>
+        
+        <h2 className="text-3xl font-serif mb-2">{lang === 'zh' ? '系統更新日誌' : 'System Update Log'}</h2>
+        <div className="text-[#38BDF8] text-xs tracking-widest uppercase mb-8">v2.0.0 — SYSTEM_REBOOT</div>
+
+        <div className="space-y-6 relative z-10 max-h-[60vh] overflow-y-auto pr-4">
+          <div className={`p-6 rounded-lg border ${theme === 'light' ? 'bg-white/50 border-black/10' : 'bg-white/5 border-white/10'}`}>
+            <h3 className="text-[#C5A059] font-bold tracking-widest uppercase mb-4 text-sm">[2026-06-23] 重大更新</h3>
+            <ul className="space-y-4 font-serif leading-relaxed text-sm md:text-base opacity-90">
+              <li className="flex gap-4">
+                <span className="text-[#38BDF8] shrink-0">✦</span>
+                <span><strong>{lang === 'zh' ? '吉他顧問上線' : 'Guitar Advisor Launched'}：</strong>{lang === 'zh' ? '正式將吉他互動教學與和弦查詢網站整合至作品集中。' : 'Integrated the interactive guitar chord and scale learning tool into the portfolio.'}</span>
+              </li>
+              <li className="flex gap-4">
+                <span className="text-[#38BDF8] shrink-0">✦</span>
+                <span><strong>{lang === 'zh' ? '作品集全面復活' : 'Portfolio Resurrection'}：</strong>{lang === 'zh' ? '全面重構網站架構，加入 3D 渾天儀與超新星爆發的史詩級開場動畫，並以全新的卡片式導覽介面重新回歸。' : 'Completely refactored the site architecture, adding a 3D armillary sphere and epic supernova boot animation, returning with a brand new grid layout.'}</span>
+              </li>
+              <li className="flex gap-4">
+                <span className="text-[#38BDF8] shrink-0">✦</span>
+                <span><strong>{lang === 'zh' ? '底層引擎大換血' : 'Engine Overhaul'}：</strong>{lang === 'zh' ? '將框架由 Next.js 替換為 Vite + React，徹底解決 GitHub Pages 靜態部署的 0% 卡死問題，實現秒開極速加載。' : 'Migrated from Next.js to Vite + React to completely resolve GitHub Pages static deployment freezing issues, achieving instant load times.'}</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+};
+
 // --- Main Page ---
 export default function Home() {
   const [lang, setLang] = useState<"en" | "zh">("zh");
   const [theme, setTheme] = useState<"light" | "dark">("dark");
   const [showIntro, setShowIntro] = useState(true);
   const [currentView, setCurrentView] = useState<"home" | "detail">("home");
+  const [showLog, setShowLog] = useState(false);
 
   const ui = {
     title: { en: "Portfolio Navigation", zh: "作品集導覽" },
@@ -392,6 +440,10 @@ export default function Home() {
     <>
       <AnimatePresence>
         {showIntro && <IntroAnimation onComplete={() => setShowIntro(false)} />}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showLog && <UpdateLogModal onClose={() => setShowLog(false)} theme={theme} lang={lang} />}
       </AnimatePresence>
 
       <main className={`min-h-screen ${themeClasses} transition-colors duration-500 overflow-x-hidden relative flex flex-col`}>
@@ -438,8 +490,14 @@ export default function Home() {
         </div>
 
         {/* Footer */}
-        <footer className={`p-6 text-center text-xs font-sans tracking-widest opacity-60 relative z-30 ${theme === "light" ? "border-t border-black/10" : "border-t border-white/10"}`}>
-          {ui.footer[lang]}
+        <footer className={`p-6 text-center text-xs font-sans tracking-widest opacity-60 relative z-30 flex flex-col items-center gap-4 ${theme === "light" ? "border-t border-black/10" : "border-t border-white/10"}`}>
+          <div>{ui.footer[lang]}</div>
+          <button 
+            onClick={() => setShowLog(true)}
+            className={`px-4 py-2 rounded-full border transition-colors ${theme === 'light' ? 'border-black/20 hover:bg-black/5' : 'border-white/20 hover:bg-white/10'}`}
+          >
+            {lang === 'zh' ? '查看更新日誌 (Changelog)' : 'View Update Log'}
+          </button>
         </footer>
 
         {/* Theme Toggle Button */}
