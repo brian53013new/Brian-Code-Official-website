@@ -379,6 +379,25 @@ const DetailView = ({ project, lang, ui, onBack, theme }) => {
 
 // 4. Update Log Modal
 const UpdateLogModal = ({ onClose, theme, lang }) => {
+  const latestUpdates = {
+    zh: [
+      ["和弦與爵士資料庫全面擴充", "新增三和弦、六和弦、七和弦、延伸與加音和弦，以及更多爵士色彩和弦；每個項目皆提供名稱、譜面簡寫、公式、指板音符與按法資訊。"],
+      ["24 種音階與調式", "從大小調、五聲與藍調音階，擴充至教會調式、旋律小調衍生調式、對稱音階與 Bebop 音階。"],
+      ["搜尋與和弦組合器", "可用中英文名稱、譜面簡寫、公式與延伸音快速搜尋，並能解析自訂和弦、升降記號、異名音及無效輸入。"],
+      ["雙語介面與吉他樂理", "完整整理中英文介面，新增專為吉他手設計的基本樂理內容，涵蓋音程、和弦形成、調內和弦與 Voice Leading。"],
+      ["全新吉他與鋼琴音色", "加入撥弦感更自然的吉他音色與多泛音鋼琴音色，並改善音量控制、播放清晰度與整體效能。"],
+      ["視覺與行動版升級", "重新設計藝廊式介面、明暗模式與卡片動態效果，並優化手機選單、內容排列及指板瀏覽體驗。"]
+    ],
+    en: [
+      ["Expanded chord and jazz library", "Added triads, sixths, sevenths, extensions, added-tone chords, and more jazz colors, complete with symbols, formulas, fretboard notes, and voicings."],
+      ["24 scales and modes", "Expanded beyond major, minor, pentatonic, and blues into church modes, melodic-minor modes, symmetrical scales, and bebop scales."],
+      ["Search and chord builder", "Search by name, symbol, formula, or extension, then build custom chords with accidentals, enharmonic spelling, and clear invalid-input feedback."],
+      ["Bilingual UI and guitar theory", "Refined the Chinese and English experience and added guitar-focused lessons on intervals, chord construction, diatonic harmony, and voice leading."],
+      ["New guitar and piano sounds", "Introduced a more natural plucked-guitar engine and a multi-partial piano sound, with improved dynamics, clarity, and playback performance."],
+      ["Visual and mobile refresh", "Redesigned the gallery-inspired interface, themes, and motion details while improving navigation, layouts, and fretboard browsing on small screens."]
+    ]
+  };
+
   return (
     <motion.div 
       className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm font-sans"
@@ -397,11 +416,24 @@ const UpdateLogModal = ({ onClose, theme, lang }) => {
         
         <button onClick={onClose} className="absolute top-6 right-6 text-2xl opacity-50 hover:opacity-100 transition-opacity z-10">&times;</button>
         
-        <h2 className="text-3xl font-serif mb-2">{lang === 'zh' ? '系統更新日誌' : 'System Update Log'}</h2>
-        <div className="text-[#38BDF8] text-xs tracking-widest uppercase mb-8">v2.0.0 — SYSTEM_REBOOT</div>
+        <h2 className="text-3xl font-serif mb-2">{lang === 'zh' ? '網站更新紀錄' : 'Website Update Log'}</h2>
+        <div className="text-[#38BDF8] text-xs tracking-widest uppercase mb-8">Guitar Chord Master · 2026 Collection</div>
 
         <div className="space-y-6 relative z-10 max-h-[60vh] overflow-y-auto pr-4 pb-12">
           
+          {/* Latest public update */}
+          <div className={`p-6 rounded-lg border ${theme === 'light' ? 'bg-white/50 border-black/10' : 'bg-white/5 border-white/10'}`}>
+            <h3 className="text-[#38BDF8] font-bold tracking-widest uppercase mb-4 text-sm">[2026-08-02] {lang === 'zh' ? '完整體驗升級' : 'Complete Experience Upgrade'}</h3>
+            <ul className="space-y-5 font-serif leading-relaxed text-sm md:text-base opacity-90">
+              {latestUpdates[lang].map(([title, body]) => (
+                <li key={title} className="flex gap-4">
+                  <span className="text-[#38BDF8] shrink-0" aria-hidden="true">◆</span>
+                  <span><strong className="block mb-1">{title}</strong>{body}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
           {/* June 24 Update */}
           <div className={`p-6 rounded-lg border ${theme === 'light' ? 'bg-white/50 border-black/10' : 'bg-white/5 border-white/10'}`}>
             <h3 className="text-[#38BDF8] font-bold tracking-widest uppercase mb-4 text-sm">[2026-06-24] 天氣系統上線</h3>
