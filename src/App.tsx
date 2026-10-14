@@ -258,10 +258,10 @@ const HomeView = ({ onSelectProject, lang }) => {
             whileHover={{ y: -5, scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => onSelectProject(proj.id)}
-            className="cursor-pointer border p-8 rounded-xl flex flex-col justify-between min-h-[250px] transition-colors border-white/10 hover:border-[#C5A059]/50 bg-white/5 hover:bg-white/10 group shadow-lg"
+            className="theme-card cursor-pointer border p-8 rounded-xl flex flex-col justify-between min-h-[250px] transition-colors group shadow-lg"
           >
             <div>
-              <div className="text-[10px] font-sans tracking-widest uppercase opacity-50 mb-4 group-hover:text-[#C5A059] transition-colors">
+              <div className="theme-accent-text text-[10px] font-sans tracking-widest uppercase opacity-70 mb-4 transition-colors">
                 {proj.type[lang]}
               </div>
               <h3 className="text-2xl font-serif mb-4">{proj.title[lang]}</h3>
@@ -270,7 +270,7 @@ const HomeView = ({ onSelectProject, lang }) => {
               </p>
             </div>
             <div className="mt-8 flex justify-end">
-              <span className="text-xs font-sans tracking-widest uppercase opacity-0 group-hover:opacity-100 transition-opacity text-[#C5A059]">
+              <span className="theme-accent-text text-xs font-sans tracking-widest uppercase opacity-0 group-hover:opacity-100 transition-opacity">
                 View Details &rarr;
               </span>
             </div>
@@ -282,7 +282,7 @@ const HomeView = ({ onSelectProject, lang }) => {
 };
 
 // 3. Detail View
-const DetailView = ({ project, lang, ui, onBack, theme }) => {
+const DetailView = ({ project, lang, ui, onBack }) => {
   const [demoFinished, setDemoFinished] = useState(false);
 
   useEffect(() => {
@@ -301,7 +301,7 @@ const DetailView = ({ project, lang, ui, onBack, theme }) => {
       transition={{ duration: 0.8 }}
     >
       {/* Left Panel: Introduction */}
-      <div className={`w-full md:w-1/3 p-6 md:p-12 flex flex-col justify-center md:border-r z-20 gap-8 ${theme === "light" ? "border-museum-border/30" : "border-white/10"}`}>
+      <div className="theme-border w-full md:w-1/3 p-6 md:p-12 flex flex-col justify-center md:border-r z-20 gap-8">
         <motion.div initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.2 }}>
           <button 
             onClick={onBack}
@@ -319,9 +319,7 @@ const DetailView = ({ project, lang, ui, onBack, theme }) => {
             href={project.link} 
             target="_blank" 
             rel="noopener noreferrer"
-            className={`inline-block text-center text-sm font-sans font-bold tracking-[0.2em] uppercase px-8 py-5 rounded-full transition-all duration-300 shadow-xl hover:shadow-[0_0_30px_rgba(197,160,89,0.3)] ${
-              theme === "light" ? "bg-[#333] text-white hover:bg-black" : "bg-gradient-to-r from-[#C5A059] to-[#E5C079] text-black hover:scale-105"
-            }`}
+            className="theme-primary-button inline-block text-center text-sm font-sans font-bold tracking-[0.2em] uppercase px-8 py-5 rounded-full transition-all duration-300 shadow-xl hover:scale-105"
           >
             {ui.visitSite[lang]} ↗
           </a>
@@ -329,10 +327,10 @@ const DetailView = ({ project, lang, ui, onBack, theme }) => {
       </div>
 
       {/* Right Panel: Interactive iframe demo */}
-      <div className={`w-full md:w-2/3 relative flex flex-col p-6 md:p-12 min-h-[500px] ${theme === "light" ? "bg-[#F4F1EA]" : "bg-[#1A1A1A]"}`}>
+      <div className="theme-panel w-full md:w-2/3 relative flex flex-col p-6 md:p-12 min-h-[500px]">
         <motion.div
           className="w-full h-full rounded-2xl overflow-hidden border shadow-2xl relative bg-black flex items-center justify-center"
-          style={{ borderColor: theme === "light" ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.1)" }}
+          style={{ borderColor: "var(--theme-border)" }}
           initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 0.4, duration: 0.8 }}
@@ -377,26 +375,62 @@ const DetailView = ({ project, lang, ui, onBack, theme }) => {
   );
 };
 
+const changelogEntries = [
+  {
+    date: "2026-10-14",
+    title: { zh: "吉他和弦網站｜重大功能更新", en: "Guitar Chord Website | Major Feature Update" },
+    sections: {
+      zh: [
+        ["和弦資料庫與分類更新", ["依實際組成音、音程結構與和聲功能重新整理分類，主要資料庫整合 55 種獨立和弦類型。", "add 類和弦統一交由和弦加音模擬器處理；移除爵士色彩分類並將合理的延伸和弦重新歸類。", "保留 Half-Diminished（m7♭5）、Sus2、Sus4，並擴充六和弦、七和弦、九和弦及其他延伸和弦。", "六和弦涵蓋 Major 6、Minor 6、Major 6/9、Minor 6/9、Major 6/9(#11)；九和弦涵蓋 Major 9、Minor 9、Dominant 9、Minor-major 9、Half-Diminished 9、9sus4。", "優化變化音命名並同步本機 API 中英文和弦資料。"]],
+        ["爵士和弦生成系統升級", ["新增 Rootless Voicing，可自行決定生成指法是否包含根音；無根音模式優先保留三音、七音及重要延伸音。", "新增六條琴弦自由選擇器，可指定相鄰或非相鄰琴弦組合。", "生成結果會遵守指定琴弦、根音設定與實際可演奏條件；友好模式優先小跨度指法，進階模式提供更多爵士聲部排列。", "無法生成符合條件的指法時會顯示明確提示。"]],
+        ["和弦加音模擬器升級", ["將原和弦組合器升級為和弦加音模擬器，可先選擇基礎和弦，再加入一個或兩個音。", "支援 2／9、♭9、♯9、4／11、♯11、6／13、♭13，並自動分析新增後的結構與名稱。", "可正確區分 Cadd9、C9、Cmaj9，結果可直接開啟吉他指板及指法檢視。"]],
+        ["音樂功能與操作改善", ["保留和弦音程分析、指板音名／音程度數切換及不同指法變體。", "保留吉他與鋼琴試聽並優化合成播放模式。", "保留中英文介面切換，改善搜尋、分類瀏覽與整體操作流程。"]],
+        ["首次開啟更新公告", ["新增首次開啟公告，同一瀏覽器以 localStorage 記錄已讀狀態並只顯示一次。", "點擊公告任意位置即可關閉，支援淡出動畫與手機、平板、電腦響應式顯示。", "公告完整呈現主要更新，並提供以新分頁開啟 Brian Code 官方網站的完整紀錄連結。"]],
+        ["六種網站風格模式", ["新增 Classic、Dark Professional、Minimal Light、Vintage Jazz、Tech Blue、Forest Green 六種完整風格。", "風格會同步套用全站文字、背景、按鈕、面板、選單與彈窗，並支援各尺寸裝置。", "使用 localStorage 記住選擇，重新開啟網站會自動恢復。"]]
+      ],
+      en: [
+        ["Chord database and classification", ["Reorganized the library by pitch content, interval structure, and harmonic function, consolidating 55 distinct chord types.", "Moved add chords into the added-tone simulator, removed the jazz-color category, and reassigned valid extensions.", "Retained Half-Diminished (m7♭5), Sus2, and Sus4 while expanding sixth, seventh, ninth, and extended chords.", "Expanded sixth and ninth families, refined altered-note naming, and synchronized Chinese and English local API data."]],
+        ["Jazz chord generation", ["Added optional Rootless Voicing that prioritizes thirds, sevenths, and essential extensions.", "Added a six-string selector supporting adjacent and non-adjacent string sets.", "Results respect string, root, and playability constraints; friendly mode favors compact shapes while advanced mode enables richer jazz voicings.", "Clear feedback is shown when no playable voicing matches the selected conditions."]],
+        ["Added-tone simulator", ["Upgraded the chord builder into an added-tone simulator with one or two optional notes.", "Supports 2/9, ♭9, ♯9, 4/11, ♯11, 6/13, and ♭13 with automatic naming and structural analysis.", "Correctly distinguishes Cadd9, C9, and Cmaj9 and opens results directly on the fretboard and fingering viewer."]],
+        ["Music and usability improvements", ["Retained interval analysis, note/degree fretboard labels, and voicing variants.", "Kept guitar and piano playback while improving synthesis.", "Preserved bilingual controls and improved search, category browsing, and overall flow."]],
+        ["First-visit announcement", ["Added a one-time announcement remembered with localStorage.", "Clicking anywhere dismisses it with a fade animation across phone, tablet, and desktop layouts.", "The notice presents the main changes and links to the full Brian Code update log in a new tab."]],
+        ["Six visual styles", ["Added Classic, Dark Professional, Minimal Light, Vintage Jazz, Tech Blue, and Forest Green.", "Each style covers site-wide text, backgrounds, controls, panels, menus, and dialogs on every screen size.", "The selected style is saved in localStorage and restored automatically."]]
+      ]
+    }
+  },
+  {
+    date: "2026-08-02",
+    title: { zh: "Guitar Chord Master 完整體驗升級", en: "Guitar Chord Master Experience Upgrade" },
+    sections: {
+      zh: [["新增與改善", ["擴充和弦與 24 種音階資料，新增搜尋、和弦組合器及吉他樂理。", "加入吉他與鋼琴音色、播放效能改善、藝廊式視覺與行動版優化。"]]],
+      en: [["New and improved", ["Expanded the chord library and 24-scale collection with search, a chord builder, and guitar theory.", "Added guitar and piano sounds, playback improvements, gallery-inspired visuals, and mobile optimization."]]]
+    }
+  },
+  {
+    date: "2026-06-24",
+    title: { zh: "天氣系統上線", en: "Weather System Launch" },
+    sections: {
+      zh: [["藝術天氣嚮導", ["ArtWeather Muse 2.0 正式收錄至作品集，結合天氣數據、藝術風格與穿搭指引。", "新增問題回報表單。"]]],
+      en: [["ArtWeather Muse", ["Added ArtWeather Muse 2.0 to the portfolio, combining weather data, art direction, and outfit guidance.", "Added an issue-report form."]]]
+    }
+  },
+  {
+    date: "2026-06-23",
+    title: { zh: "官方網站重大更新", en: "Official Website Major Update" },
+    sections: {
+      zh: [["網站與作品集", ["吉他顧問正式整合至作品集。", "重構網站架構並加入 3D 開場動畫與卡片式導覽。", "改用 Vite + React，改善靜態部署與載入體驗。"]]],
+      en: [["Website and portfolio", ["Integrated Guitar Advisor into the portfolio.", "Rebuilt the site architecture with a 3D intro and card-based directory.", "Migrated to Vite + React for more reliable static deployment and loading."]]]
+    }
+  }
+].sort((a, b) => b.date.localeCompare(a.date));
+
+const formatDate = (date, lang) => {
+  const [year, month, day] = date.split("-");
+  return lang === "zh" ? `${year} 年 ${month} 月 ${day} 日` : `${year}-${month}-${day}`;
+};
+
 // 4. Update Log Modal
-const UpdateLogModal = ({ onClose, theme, lang }) => {
-  const latestUpdates = {
-    zh: [
-      ["和弦與爵士資料庫全面擴充", "新增三和弦、六和弦、七和弦、延伸與加音和弦，以及更多爵士色彩和弦；每個項目皆提供名稱、譜面簡寫、公式、指板音符與按法資訊。"],
-      ["24 種音階與調式", "從大小調、五聲與藍調音階，擴充至教會調式、旋律小調衍生調式、對稱音階與 Bebop 音階。"],
-      ["搜尋與和弦組合器", "可用中英文名稱、譜面簡寫、公式與延伸音快速搜尋，並能解析自訂和弦、升降記號、異名音及無效輸入。"],
-      ["雙語介面與吉他樂理", "完整整理中英文介面，新增專為吉他手設計的基本樂理內容，涵蓋音程、和弦形成、調內和弦與 Voice Leading。"],
-      ["全新吉他與鋼琴音色", "加入撥弦感更自然的吉他音色與多泛音鋼琴音色，並改善音量控制、播放清晰度與整體效能。"],
-      ["視覺與行動版升級", "重新設計藝廊式介面、明暗模式與卡片動態效果，並優化手機選單、內容排列及指板瀏覽體驗。"]
-    ],
-    en: [
-      ["Expanded chord and jazz library", "Added triads, sixths, sevenths, extensions, added-tone chords, and more jazz colors, complete with symbols, formulas, fretboard notes, and voicings."],
-      ["24 scales and modes", "Expanded beyond major, minor, pentatonic, and blues into church modes, melodic-minor modes, symmetrical scales, and bebop scales."],
-      ["Search and chord builder", "Search by name, symbol, formula, or extension, then build custom chords with accidentals, enharmonic spelling, and clear invalid-input feedback."],
-      ["Bilingual UI and guitar theory", "Refined the Chinese and English experience and added guitar-focused lessons on intervals, chord construction, diatonic harmony, and voice leading."],
-      ["New guitar and piano sounds", "Introduced a more natural plucked-guitar engine and a multi-partial piano sound, with improved dynamics, clarity, and playback performance."],
-      ["Visual and mobile refresh", "Redesigned the gallery-inspired interface, themes, and motion details while improving navigation, layouts, and fretboard browsing on small screens."]
-    ]
-  };
+const UpdateLogModal = ({ onClose, lang }) => {
 
   return (
     <motion.div 
@@ -406,7 +440,7 @@ const UpdateLogModal = ({ onClose, theme, lang }) => {
       exit={{ opacity: 0 }}
     >
       <motion.div 
-        className={`relative w-full max-w-2xl p-8 md:p-12 border shadow-2xl overflow-hidden ${theme === 'light' ? 'bg-[#F4F1EA] border-black/20 text-[#333]' : 'bg-[#121212] border-[#38BDF8]/30 text-white'}`}
+        className="theme-modal relative w-full max-w-4xl p-6 md:p-10 border shadow-2xl overflow-hidden"
         initial={{ scale: 0.9, y: 20 }}
         animate={{ scale: 1, y: 0 }}
         exit={{ scale: 0.9, y: 20 }}
@@ -417,56 +451,29 @@ const UpdateLogModal = ({ onClose, theme, lang }) => {
         <button onClick={onClose} className="absolute top-6 right-6 text-2xl opacity-50 hover:opacity-100 transition-opacity z-10">&times;</button>
         
         <h2 className="text-3xl font-serif mb-2">{lang === 'zh' ? '網站更新紀錄' : 'Website Update Log'}</h2>
-        <div className="text-[#38BDF8] text-xs tracking-widest uppercase mb-8">Guitar Chord Master · 2026 Collection</div>
+        <div className="theme-accent-text text-xs tracking-widest uppercase mb-8">Brian Code · Changelog</div>
 
-        <div className="space-y-6 relative z-10 max-h-[60vh] overflow-y-auto pr-4 pb-12">
-          
-          {/* Latest public update */}
-          <div className={`p-6 rounded-lg border ${theme === 'light' ? 'bg-white/50 border-black/10' : 'bg-white/5 border-white/10'}`}>
-            <h3 className="text-[#38BDF8] font-bold tracking-widest uppercase mb-4 text-sm">[2026-08-02] {lang === 'zh' ? '完整體驗升級' : 'Complete Experience Upgrade'}</h3>
-            <ul className="space-y-5 font-serif leading-relaxed text-sm md:text-base opacity-90">
-              {latestUpdates[lang].map(([title, body]) => (
-                <li key={title} className="flex gap-4">
-                  <span className="text-[#38BDF8] shrink-0" aria-hidden="true">◆</span>
-                  <span><strong className="block mb-1">{title}</strong>{body}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* June 24 Update */}
-          <div className={`p-6 rounded-lg border ${theme === 'light' ? 'bg-white/50 border-black/10' : 'bg-white/5 border-white/10'}`}>
-            <h3 className="text-[#38BDF8] font-bold tracking-widest uppercase mb-4 text-sm">[2026-06-24] 天氣系統上線</h3>
-            <ul className="space-y-4 font-serif leading-relaxed text-sm md:text-base opacity-90">
-              <li className="flex gap-4">
-                <span className="text-[#38BDF8] shrink-0">✦</span>
-                <span><strong>{lang === 'zh' ? '藝術天氣嚮導' : 'ArtWeather Muse 2.0'}：</strong>{lang === 'zh' ? '全新升級的天氣網站「ArtWeather Muse 2.0」正式收錄至作品集導覽中。將天氣數據與藝術完美結合，提供穿搭與氣象指引。' : 'The brand new weather site "ArtWeather Muse 2.0" has been officially added to the portfolio. It combines weather data with art to provide outfit and forecast guidance.'}</span>
-              </li>
-              <li className="flex gap-4">
-                <span className="text-[#38BDF8] shrink-0">✦</span>
-                <span><strong>{lang === 'zh' ? '客服與問題回報' : 'Support Form'}：</strong>{lang === 'zh' ? '加入 Google 表單功能，幫助使用者解決填寫問題的困難，隨時回報任何遇到的錯誤或建議。' : 'Added a Google form reporting mechanism to help users solve problems and easily report any bugs or suggestions.'}</span>
-              </li>
-            </ul>
-          </div>
-
-          {/* June 23 Update */}
-          <div className={`p-6 rounded-lg border ${theme === 'light' ? 'bg-white/50 border-black/10' : 'bg-white/5 border-white/10'}`}>
-            <h3 className="text-[#C5A059] font-bold tracking-widest uppercase mb-4 text-sm">[2026-06-23] 重大更新</h3>
-            <ul className="space-y-4 font-serif leading-relaxed text-sm md:text-base opacity-90">
-              <li className="flex gap-4">
-                <span className="text-[#38BDF8] shrink-0">✦</span>
-                <span><strong>{lang === 'zh' ? '吉他顧問上線' : 'Guitar Advisor Launched'}：</strong>{lang === 'zh' ? '正式將吉他互動教學與和弦查詢網站整合至作品集中。' : 'Integrated the interactive guitar chord and scale learning tool into the portfolio.'}</span>
-              </li>
-              <li className="flex gap-4">
-                <span className="text-[#38BDF8] shrink-0">✦</span>
-                <span><strong>{lang === 'zh' ? '作品集全面復活' : 'Portfolio Resurrection'}：</strong>{lang === 'zh' ? '全面重構網站架構，加入 3D 渾天儀與超新星爆發的史詩級開場動畫，並以全新的卡片式導覽介面重新回歸。' : 'Completely refactored the site architecture, adding a 3D armillary sphere and epic supernova boot animation, returning with a brand new grid layout.'}</span>
-              </li>
-              <li className="flex gap-4">
-                <span className="text-[#38BDF8] shrink-0">✦</span>
-                <span><strong>{lang === 'zh' ? '底層引擎大換血' : 'Engine Overhaul'}：</strong>{lang === 'zh' ? '將框架由 Next.js 替換為 Vite + React，徹底解決 GitHub Pages 靜態部署的 0% 卡死問題，實現秒開極速加載。' : 'Migrated from Next.js to Vite + React to completely resolve GitHub Pages static deployment freezing issues, achieving instant load times.'}</span>
-              </li>
-            </ul>
-          </div>
+        <div className="space-y-5 relative z-10 max-h-[65vh] overflow-y-auto pr-2 md:pr-4 pb-6">
+          {changelogEntries.map((entry, index) => (
+            <details key={entry.date} open={index === 0} className="theme-card changelog-entry rounded-xl border p-5 md:p-6">
+              <summary className="cursor-pointer list-none pr-8 relative">
+                <h3 className="text-lg md:text-xl font-serif font-bold">{entry.title[lang]}</h3>
+                <p className="theme-accent-text mt-2 text-xs md:text-sm font-sans tracking-wider">
+                  {lang === "zh" ? "發布日期：" : "Published: "}{formatDate(entry.date, lang)}
+                </p>
+              </summary>
+              <div className="mt-6 space-y-6">
+                {entry.sections[lang].map(([heading, items]) => (
+                  <section key={heading}>
+                    <h4 className="theme-accent-text mb-3 font-bold">{heading}</h4>
+                    <ul className="space-y-2 text-sm md:text-base leading-relaxed opacity-90">
+                      {items.map((item) => <li key={item} className="flex gap-3"><span aria-hidden="true">◆</span><span>{item}</span></li>)}
+                    </ul>
+                  </section>
+                ))}
+              </div>
+            </details>
+          ))}
         </div>
       </motion.div>
     </motion.div>
@@ -474,13 +481,37 @@ const UpdateLogModal = ({ onClose, theme, lang }) => {
 };
 
 // --- Main Page ---
+const themeOptions = [
+  { id: "classic", zh: "經典風格", en: "Classic" },
+  { id: "dark-professional", zh: "深色專業", en: "Dark Professional" },
+  { id: "minimal-light", zh: "極簡淺色", en: "Minimal Light" },
+  { id: "vintage-jazz", zh: "爵士復古", en: "Vintage Jazz" },
+  { id: "tech-blue", zh: "科技藍", en: "Tech Blue" },
+  { id: "forest-green", zh: "森林綠", en: "Forest Green" }
+];
+
+const getInitialTheme = () => {
+  if (typeof window === "undefined") return "classic";
+  const saved = window.localStorage.getItem("brian-code-theme");
+  return themeOptions.some((option) => option.id === saved) ? saved : "classic";
+};
+
 export default function Home() {
   const [lang, setLang] = useState<"en" | "zh">("zh");
-  const [theme, setTheme] = useState<"light" | "dark">("dark");
+  const [theme, setTheme] = useState(getInitialTheme);
   const [showIntro, setShowIntro] = useState(true);
   const [currentView, setCurrentView] = useState<"home" | "detail">("home");
   const [activeProjectId, setActiveProjectId] = useState<string>("guitar-advisor");
   const [showLog, setShowLog] = useState(false);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    window.localStorage.setItem("brian-code-theme", theme);
+  }, [theme]);
+
+  useEffect(() => {
+    document.documentElement.lang = lang === "zh" ? "zh-Hant" : "en";
+  }, [lang]);
 
   const activeProject = projectsData.find(p => p.id === activeProjectId) || projectsData[0];
 
@@ -488,13 +519,10 @@ export default function Home() {
     title: { en: "Portfolio Navigation", zh: "作品集導覽" },
     visitSite: { en: "Launch Website", zh: "立即前往網站" },
     demo: { en: "Interactive Preview", zh: "即時預覽" },
+    style: { en: "Change style", zh: "更改風格" },
     footer: { en: "© 2026. This website is in testing phase: please report any issues.", zh: "© 2026. 本網站為測試階段:如有問題，請回報。" },
     brand: "Brian&code"
   };
-
-  const themeClasses = theme === "light"
-    ? "bg-[#F9F9F9] text-[#333333] selection:bg-museum-accent/20"
-    : "bg-[#121212] text-[#FAF9F6] selection:bg-[#FAF9F6]/20";
 
   return (
     <>
@@ -503,23 +531,32 @@ export default function Home() {
       </AnimatePresence>
 
       <AnimatePresence>
-        {showLog && <UpdateLogModal onClose={() => setShowLog(false)} theme={theme} lang={lang} />}
+        {showLog && <UpdateLogModal onClose={() => setShowLog(false)} lang={lang} />}
       </AnimatePresence>
 
-      <main className={`min-h-screen ${themeClasses} transition-colors duration-500 overflow-x-hidden relative flex flex-col`}>
+      <main data-theme={theme} className="theme-shell min-h-screen transition-colors duration-500 overflow-x-hidden relative flex flex-col">
         {/* Navigation / Header */}
         <nav className="w-full p-6 md:px-12 md:py-8 flex justify-between items-center z-30 absolute top-0 left-0">
           <div className="text-sm font-sans font-bold tracking-[0.2em] uppercase cursor-pointer" onClick={() => setCurrentView("home")}>
             {ui.title[lang]}
           </div>
-          <div className="flex items-center gap-6">
-            <span className="text-sm font-sans font-bold tracking-[0.2em] text-[#C5A059]">{ui.brand}</span>
+          <div className="flex flex-wrap justify-end items-center gap-2 md:gap-4">
+            <span className="theme-accent-text hidden sm:inline text-sm font-sans font-bold tracking-[0.2em]">{ui.brand}</span>
+            <label className="sr-only" htmlFor="theme-select">{ui.style[lang]}</label>
+            <select
+              id="theme-select"
+              value={theme}
+              onChange={(event) => setTheme(event.target.value)}
+              className="theme-control max-w-[9.5rem] md:max-w-none text-xs font-sans font-bold border px-3 py-2 rounded-full cursor-pointer"
+              aria-label={ui.style[lang]}
+            >
+              {themeOptions.map((option) => (
+                <option key={option.id} value={option.id}>{option[lang]}</option>
+              ))}
+            </select>
             <button
               onClick={() => setLang(lang === "en" ? "zh" : "en")}
-              className={`text-xs font-sans font-bold tracking-widest uppercase border px-4 py-2 rounded-full transition-all duration-300 shadow-sm ${theme === "light"
-                ? "bg-white/80 border-museum-text/10 hover:bg-museum-text hover:text-white"
-                : "bg-black/80 border-white/10 hover:bg-white hover:text-black"
-                }`}
+              className="theme-control text-xs font-sans font-bold tracking-widest uppercase border px-4 py-2 rounded-full transition-all duration-300 shadow-sm"
             >
               {lang === "en" ? "中文" : "EN"}
             </button>
@@ -545,7 +582,6 @@ export default function Home() {
                 project={activeProject}
                 lang={lang} 
                 ui={ui} 
-                theme={theme}
                 onBack={() => setCurrentView("home")}
               />
             )}
@@ -553,12 +589,12 @@ export default function Home() {
         </div>
 
         {/* Footer */}
-        <footer className={`p-6 text-center text-xs font-sans tracking-widest opacity-60 relative z-30 flex flex-col items-center gap-4 ${theme === "light" ? "border-t border-black/10" : "border-t border-white/10"}`}>
+        <footer className="theme-border p-6 text-center text-xs font-sans tracking-widest opacity-80 relative z-30 flex flex-col items-center gap-4 border-t">
           <div>{ui.footer[lang]}</div>
           <div className="flex gap-4 items-center">
             <button 
               onClick={() => setShowLog(true)}
-              className={`px-4 py-2 rounded-full border transition-colors ${theme === 'light' ? 'border-black/20 hover:bg-black/5' : 'border-white/20 hover:bg-white/10'}`}
+              className="theme-control px-4 py-2 rounded-full border transition-colors"
             >
               {lang === 'zh' ? '查看更新日誌 (Changelog)' : 'View Update Log'}
             </button>
@@ -566,23 +602,12 @@ export default function Home() {
               href="https://forms.gle/6UxbjJfYSMPx9qpJ7"
               target="_blank"
               rel="noopener noreferrer"
-              className={`px-4 py-2 rounded-full border transition-colors ${theme === 'light' ? 'border-[#38BDF8] text-[#38BDF8] hover:bg-[#38BDF8]/10' : 'border-[#38BDF8] text-[#38BDF8] hover:bg-[#38BDF8]/20'}`}
+              className="theme-control theme-accent-text px-4 py-2 rounded-full border transition-colors"
             >
               {lang === 'zh' ? '問題回報 (Report Issue)' : 'Report Issue'}
             </a>
           </div>
         </footer>
-
-        {/* Theme Toggle Button */}
-        <motion.button
-          onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className={`fixed bottom-20 right-6 md:bottom-6 z-50 w-14 h-14 rounded-full flex items-center justify-center shadow-2xl transition-colors ${theme === "light" ? "bg-[#121212] text-white hover:bg-black" : "bg-[#F9F9F9] text-black hover:bg-white"}`}
-          title="Toggle Theme"
-        >
-          {theme === "light" ? <span className="text-xl">🌙</span> : <span className="text-xl">☀️</span>}
-        </motion.button>
 
       </main>
     </>

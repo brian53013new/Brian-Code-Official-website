@@ -1,11 +1,18 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant" data-theme="classic">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Portfolio Directory</title>
+    <title>Brian Code｜作品集導覽</title>
+    <script>
+      (() => {
+        const themes = ["classic", "dark-professional", "minimal-light", "vintage-jazz", "tech-blue", "forest-green"];
+        const saved = localStorage.getItem("brian-code-theme");
+        document.documentElement.dataset.theme = themes.includes(saved) ? saved : "classic";
+      })();
+    </script>
   </head>
-  <body class="bg-[#121212] text-[#FAF9F6] antialiased selection:bg-[#FAF9F6]/20">
+  <body class="antialiased">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
