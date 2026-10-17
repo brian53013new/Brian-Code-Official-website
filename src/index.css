@@ -202,3 +202,168 @@ h6 {
     max-height: calc(100dvh - 2rem);
   }
 }
+
+.pixel-earth-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  overflow: hidden;
+  background: #030405;
+  color: #f6f1e7;
+  opacity: 1;
+  transition: opacity 520ms ease;
+}
+
+.pixel-earth-intro.is-leaving {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.pixel-earth-canvas,
+.pixel-earth-canvas canvas,
+.pixel-earth-vignette,
+.pixel-earth-grain,
+.pixel-earth-gold-transition,
+.pixel-earth-fallback {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.pixel-earth-canvas canvas {
+  display: block;
+}
+
+.pixel-earth-vignette {
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 48%, transparent 24%, rgba(0, 0, 0, 0.2) 58%, rgba(0, 0, 0, 0.86) 100%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 35%, rgba(0, 0, 0, 0.22));
+}
+
+.pixel-earth-grain {
+  pointer-events: none;
+  opacity: 0.12;
+  mix-blend-mode: screen;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.78' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.42'/%3E%3C/svg%3E");
+  animation: pixel-grain 0.2s steps(2) infinite;
+}
+
+.pixel-earth-gold-transition {
+  pointer-events: none;
+  opacity: 0;
+  mix-blend-mode: screen;
+  background: radial-gradient(circle at 50% 49%, #ffe8b5 0%, #eeba62 18%, #b97824 44%, rgba(120, 66, 19, 0.2) 68%, transparent 83%);
+  animation: portal-transition 7s cubic-bezier(0.68, 0, 0.2, 1) forwards;
+}
+
+.pixel-earth-copy {
+  position: absolute;
+  left: clamp(1.25rem, 4vw, 4rem);
+  bottom: clamp(1.5rem, 5vw, 4rem);
+  display: grid;
+  gap: 0.35rem;
+  pointer-events: none;
+  text-shadow: 0 1px 20px rgba(0, 0, 0, 0.85);
+  animation: intro-copy 7s ease forwards;
+}
+
+.pixel-earth-copy span {
+  color: #d4a957;
+  font: 600 0.65rem/1.2 ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: 0.34em;
+}
+
+.pixel-earth-copy strong {
+  font: 500 clamp(0.85rem, 1.6vw, 1.25rem)/1.2 Georgia, serif;
+  letter-spacing: 0.16em;
+}
+
+.pixel-earth-skip {
+  position: absolute;
+  top: clamp(1rem, 3vw, 2rem);
+  right: clamp(1rem, 3vw, 2rem);
+  min-height: 44px;
+  padding: 0.7rem 1rem;
+  border: 1px solid rgba(255, 225, 169, 0.48);
+  border-radius: 999px;
+  background: rgba(5, 6, 7, 0.72);
+  color: #fff2d5;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+  transition: background 180ms ease, border-color 180ms ease, transform 180ms ease;
+}
+
+.pixel-earth-skip:hover,
+.pixel-earth-skip:focus-visible {
+  border-color: #ffd78d;
+  background: rgba(74, 48, 15, 0.86);
+  outline: 2px solid #fff2d5;
+  outline-offset: 3px;
+  transform: translateY(-1px);
+}
+
+.pixel-earth-fallback {
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle, #27241e, #030405 65%);
+}
+
+.pixel-earth-fallback span {
+  width: min(44vw, 15rem);
+  aspect-ratio: 1;
+  border: 1px solid rgba(255, 255, 255, 0.36);
+  border-radius: 50%;
+  box-shadow: inset -2rem -1rem 4rem rgba(0, 0, 0, 0.85), 0 0 3rem rgba(255, 210, 125, 0.15);
+}
+
+@keyframes portal-transition {
+  0%, 70% { opacity: 0; transform: scale(0.25); }
+  80% { opacity: 0.08; transform: scale(0.38); }
+  90% { opacity: 0.42; transform: scale(0.72); }
+  98%, 100% { opacity: 1; transform: scale(2.2); }
+}
+
+@keyframes pixel-grain {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-1%, 1%); }
+  50% { transform: translate(1%, -1%); }
+  75% { transform: translate(1%, 1%); }
+}
+
+@keyframes intro-copy {
+  0%, 7% { opacity: 0; transform: translateY(0.75rem); }
+  16%, 70% { opacity: 0.78; transform: translateY(0); }
+  82%, 100% { opacity: 0; transform: translateY(-0.5rem); }
+}
+
+@media (max-width: 640px) {
+  .pixel-earth-skip {
+    left: 1rem;
+    right: auto;
+  }
+
+  .pixel-earth-copy {
+    right: 1.25rem;
+  }
+
+  .pixel-earth-copy strong {
+    font-size: 0.78rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixel-earth-grain,
+  .pixel-earth-gold-transition,
+  .pixel-earth-copy {
+    animation: none;
+  }
+
+  .pixel-earth-gold-transition {
+    opacity: 0.22;
+    transform: scale(1.5);
+  }
+}

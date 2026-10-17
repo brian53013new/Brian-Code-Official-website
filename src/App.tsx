@@ -1,8 +1,20 @@
 // @ts-nocheck
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+
+const IntroLoadFallback = ({ onComplete }) => {
+  useEffect(() => {
+    const timer = window.setTimeout(onComplete, 100);
+    return () => window.clearTimeout(timer);
+  }, [onComplete]);
+  return null;
+};
+
+const PixelEarthIntro = React.lazy(() =>
+  import("./PixelEarthIntro").catch(() => ({ default: IntroLoadFallback }))
+);
 
 // --- Components ---
 
@@ -379,6 +391,27 @@ const changelogEntries = [
   {
     date: "2026-10-17",
     version: "0.1.0",
+    title: { zh: "網站啟動動畫全面升級｜3D 像素地球與金色門扉", en: "Opening Animation Upgrade | 3D Pixel Earth and Golden Portal" },
+    sections: {
+      zh: [
+        ["3D 像素地球", ["以 Three.js SphereGeometry 建立真正的球體幾何，搭配半透明玻璃外殼、灰階像素大陸點雲、球面網格與輪廓光。", "大陸像素依球面經緯座標生成，旋轉時具有透視縮窄、深度遮擋與背面隱藏效果。"]],
+        ["立體浮雕門扉", ["門框、門板與裝飾使用獨立 BoxGeometry 建立實際厚度，並作為地球群組子物件固定於球面切線位置。", "門扉會隨地球由側面旋轉至鏡頭正前方，不會脫離或漂浮；雙門板在靠近階段由樞紐向內側開啟。"]],
+        ["電影式運鏡與金色轉場", ["地球先淡入並旋轉，門扉對準後 PerspectiveCamera 才由遠處平滑推近。", "門縫先出現細緻琥珀金光，再同步提高點光源、門框反射與放射光暈，最後由金色光幕淡入網站主畫面。", "完整時間軸約 7 秒，動畫結束會清理 WebGL 資源、事件與影格更新。"]],
+        ["效能、裝置與無障礙", ["手機與低記憶體裝置會降低球體細分、像素密度、像素比與陰影品質。", "Three.js 動畫採動態載入，與網站主程式分離；WebGL 建立失敗、模組載入失敗或 context lost 時會自動進入網站。", "新增略過動畫按鈕、背景捲動鎖定、動畫結束後焦點還原，以及 prefers-reduced-motion 快速略過流程。", "既有六種網站風格與 localStorage 選擇不會被啟動動畫重設。"]],
+        ["版本資訊", ["目前專案版本為 0.1.0（依 package.json）；未建立獨立發布標籤。"]]
+      ],
+      en: [
+        ["3D pixel Earth", ["Built a true sphere with Three.js SphereGeometry, a translucent glass shell, grayscale pixel-continent point cloud, spherical grid, and rim lighting.", "Pixels are generated from spherical latitude/longitude coordinates, preserving perspective narrowing, depth occlusion, and back-face hiding during rotation."]],
+        ["Relief portal", ["The frame, doors, and ornaments use independent BoxGeometry meshes with real depth and are attached to the Earth group at the sphere tangent.", "The portal rotates with the globe into a front-facing position; hinged door panels open only during the approach."]],
+        ["Camera and golden transition", ["The Earth fades in and rotates before the PerspectiveCamera begins its smooth approach.", "A thin amber seam grows into portal lighting, frame reflections, and a radiant gold transition into the prepared site.", "The complete timeline runs about seven seconds and disposes WebGL resources, listeners, and animation frames on exit."]],
+        ["Performance and accessibility", ["Mobile and low-memory devices reduce sphere segments, pixel density, pixel ratio, and shadow quality.", "The Three.js scene is code-split; module, WebGL, and context-loss failures automatically continue to the site.", "Added a skip button, scroll locking, focus restoration, and a shortened reduced-motion path.", "The saved six-theme preference remains unchanged."]],
+        ["Version", ["Current project version is 0.1.0 from package.json; no standalone release tag has been created."]]
+      ]
+    }
+  },
+  {
+    date: "2026-10-17",
+    version: "0.1.0",
     title: { zh: "ArtWeather Muse｜資訊卡片詳細資訊視窗", en: "ArtWeather Muse | Information Card Detail Dialog" },
     sections: {
       zh: [
@@ -522,6 +555,12 @@ export default function Home() {
   const [currentView, setCurrentView] = useState<"home" | "detail">("home");
   const [activeProjectId, setActiveProjectId] = useState<string>("guitar-advisor");
   const [showLog, setShowLog] = useState(false);
+  const mainRef = useRef<HTMLElement>(null);
+
+  const completeIntro = () => {
+    setShowIntro(false);
+    window.requestAnimationFrame(() => mainRef.current?.focus({ preventScroll: true }));
+  };
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -546,14 +585,18 @@ export default function Home() {
   return (
     <>
       <AnimatePresence>
-        {showIntro && <IntroAnimation onComplete={() => setShowIntro(false)} />}
+        {showIntro && (
+          <React.Suspense fallback={<div className="fixed inset-0 z-[300] bg-[#030405]" aria-hidden="true" />}>
+            <PixelEarthIntro onComplete={completeIntro} />
+          </React.Suspense>
+        )}
       </AnimatePresence>
 
       <AnimatePresence>
         {showLog && <UpdateLogModal onClose={() => setShowLog(false)} lang={lang} />}
       </AnimatePresence>
 
-      <main data-theme={theme} className="theme-shell min-h-screen transition-colors duration-500 overflow-x-hidden relative flex flex-col">
+      <main ref={mainRef} tabIndex={-1} data-theme={theme} className="theme-shell min-h-screen transition-colors duration-500 overflow-x-hidden relative flex flex-col focus:outline-none">
         {/* Navigation / Header */}
         <nav className="w-full p-6 md:px-12 md:py-8 flex justify-between items-center z-30 absolute top-0 left-0">
           <div className="text-sm font-sans font-bold tracking-[0.2em] uppercase cursor-pointer" onClick={() => setCurrentView("home")}>
