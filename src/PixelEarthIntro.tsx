@@ -5,6 +5,8 @@ type PixelEarthIntroProps = {
   onComplete: () => void;
 };
 
+const INTRO_RELEASE = "pixel-earth-v2-2026-10-17";
+
 const DURATION = 7000;
 
 const smoothstep = (start: number, end: number, value: number) => {
@@ -82,53 +84,101 @@ const buildPixelContinents = (radius: number, density: number) => {
   return new THREE.Points(geometry, material);
 };
 
-const buildDoor = () => {
+const buildDoor = (radius: number, lowPower: boolean) => {
   const group = new THREE.Group();
-  group.name = "door-relief";
-  group.position.set(0, -0.08, 2.03);
+  group.name = "voxel-portal";
+  // At the front pole +Z is the surface normal, so the portal remains attached
+  // to the earth while inheriting its complete local transform.
+  group.position.set(0, -0.02, radius - 0.02);
 
-  const stone = new THREE.MeshStandardMaterial({ color: 0x292b2e, roughness: 0.72, metalness: 0.34 });
-  const edge = new THREE.MeshStandardMaterial({ color: 0x777b80, roughness: 0.48, metalness: 0.52 });
-  const doorMaterial = new THREE.MeshStandardMaterial({ color: 0x111214, roughness: 0.64, metalness: 0.28 });
-  const gold = new THREE.MeshBasicMaterial({ color: 0xffc65c, transparent: true, opacity: 0 });
+  const stone = new THREE.MeshStandardMaterial({ color: 0x24272b, roughness: 0.78, metalness: 0.2 });
+  const edge = new THREE.MeshStandardMaterial({ color: 0x777d84, roughness: 0.5, metalness: 0.42 });
+  const inset = new THREE.MeshStandardMaterial({ color: 0x0a0b0d, roughness: 0.88, metalness: 0.08 });
+  const doorMaterial = new THREE.MeshStandardMaterial({ color: 0x15171a, roughness: 0.68, metalness: 0.3 });
+  const gold = new THREE.MeshBasicMaterial({
+    color: 0xffc766,
+    transparent: true,
+    opacity: 0,
+    side: THREE.DoubleSide,
+    depthWrite: false
+  });
+  const seamGold = gold.clone();
 
-  const frameParts = [
-    [-0.72, 0, 0.12, 0.18, 1.5, 0.3], [0.72, 0, 0.12, 0.18, 1.5, 0.3],
-    [0, 0.72, 0.12, 1.62, 0.2, 0.3], [0, -0.74, 0.12, 1.68, 0.16, 0.34]
-  ];
-  frameParts.forEach(([x, y, z, width, height, depth], index) => {
-    const mesh = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), index === 2 ? edge : stone);
-    mesh.position.set(x, y, z);
-    mesh.castShadow = true;
+  const addBox = (
+    parent: THREE.Object3D,
+    size: [number, number, number],
+    position: [number, number, number],
+    material: THREE.Material,
+    castShadow = true
+  ) => {
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(...size), material);
+    mesh.position.set(...position);
+    mesh.castShadow = castShadow;
     mesh.receiveShadow = true;
-    group.add(mesh);
+    parent.add(mesh);
+    return mesh;
+  };
+
+  // Stepped voxel foundations bridge the globe's curved surface to the flat portal.
+  const baseY = -0.92;
+  [-0.72, -0.48, -0.24, 0, 0.24, 0.48, 0.72].forEach((x, index) => {
+    const surfaceZ = Math.sqrt(Math.max(0, radius * radius - x * x - baseY * baseY)) - radius;
+    addBox(group, [0.23, 0.18, 0.34], [x, baseY, surfaceZ + 0.13], index % 2 ? stone : edge);
+  });
+  addBox(group, [1.9, 0.16, 0.5], [0, -0.78, 0.18], stone);
+  addBox(group, [1.62, 0.12, 0.62], [0, -0.66, 0.28], edge);
+
+  // A recessed vestibule provides real depth behind the leaves.
+  addBox(group, [1.36, 1.42, 0.48], [0, 0.04, 0.12], inset, false);
+  const portalCore = new THREE.Mesh(new THREE.PlaneGeometry(1.18, 1.28), gold);
+  portalCore.position.set(0, 0.04, 0.385);
+  group.add(portalCore);
+
+  [-0.82, 0.82].forEach((x) => {
+    addBox(group, [0.28, 1.78, 0.58], [x, 0.04, 0.38], stone);
+    [-0.5, 0, 0.5].forEach((y, index) => {
+      addBox(group, [0.34, 0.22, 0.66], [x, y, 0.42], index % 2 ? edge : stone);
+    });
+  });
+  addBox(group, [1.92, 0.3, 0.62], [0, 0.92, 0.4], stone);
+  [-0.66, -0.33, 0, 0.33, 0.66].forEach((x, index) => {
+    addBox(group, [0.22, 0.18, 0.7], [x, 1.08, 0.43 + (index % 2) * 0.045], index % 2 ? stone : edge);
   });
 
+  const contactShadow = new THREE.Mesh(
+    new THREE.CircleGeometry(1.08, lowPower ? 20 : 32),
+    new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.4, depthWrite: false })
+  );
+  contactShadow.scale.set(1, 0.38, 1);
+  contactShadow.position.set(0, -0.86, -0.025);
+  contactShadow.rotation.x = -Math.PI / 2;
+  group.add(contactShadow);
+
+  // The outer door edges are the hinges. The free edges swing into the
+  // raised vestibule without intersecting the globe.
   const leftPivot = new THREE.Group();
   const rightPivot = new THREE.Group();
-  leftPivot.position.set(-0.04, 0, 0.15);
-  rightPivot.position.set(0.04, 0, 0.15);
-  const leftDoor = new THREE.Mesh(new THREE.BoxGeometry(0.63, 1.3, 0.13), doorMaterial);
-  const rightDoor = new THREE.Mesh(new THREE.BoxGeometry(0.63, 1.3, 0.13), doorMaterial);
-  leftDoor.position.x = -0.315;
-  rightDoor.position.x = 0.315;
-  leftDoor.castShadow = rightDoor.castShadow = true;
-  leftPivot.add(leftDoor);
-  rightPivot.add(rightDoor);
+  leftPivot.position.set(-0.66, 0.04, 0.7);
+  rightPivot.position.set(0.66, 0.04, 0.7);
+  const leftDoor = addBox(leftPivot, [0.65, 1.34, 0.16], [0.325, 0, 0], doorMaterial);
+  const rightDoor = addBox(rightPivot, [0.65, 1.34, 0.16], [-0.325, 0, 0], doorMaterial);
+
+  [leftDoor, rightDoor].forEach((leaf, leafIndex) => {
+    [-0.44, 0, 0.44].forEach((y) => {
+      addBox(leaf, [0.2, 0.16, 0.06], [leafIndex ? -0.16 : 0.16, y, 0.1], edge, false);
+    });
+  });
   group.add(leftPivot, rightPivot);
 
-  const seam = new THREE.Mesh(new THREE.PlaneGeometry(0.035, 1.28), gold);
-  seam.position.set(0, 0, 0.225);
+  const seam = new THREE.Mesh(new THREE.PlaneGeometry(0.028, 1.3), seamGold);
+  seam.position.set(0, 0.04, 0.795);
   group.add(seam);
 
-  const lintelPixels = [-0.56, -0.28, 0, 0.28, 0.56];
-  lintelPixels.forEach((x, index) => {
-    const block = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.13, 0.16), index % 2 ? stone : edge);
-    block.position.set(x, 0.91, 0.15 + (index % 2) * 0.04);
-    group.add(block);
-  });
+  const portalLight = new THREE.PointLight(0xffbd55, 0, lowPower ? 7 : 10, 1.7);
+  portalLight.position.set(0, 0.06, 1.16);
+  group.add(portalLight);
 
-  return { group, leftPivot, rightPivot, seam, gold };
+  return { group, leftPivot, rightPivot, seam, portalCore, gold, seamGold, portalLight };
 };
 
 export default function PixelEarthIntro({ onComplete }: PixelEarthIntroProps) {
@@ -223,7 +273,7 @@ export default function PixelEarthIntro({ onComplete }: PixelEarthIntroProps) {
     earth.add(wireframe);
     earth.add(buildPixelContinents(radius, lowPower ? 5 : 3));
 
-    const { group: door, leftPivot, rightPivot, seam, gold } = buildDoor();
+    const { group: door, leftPivot, rightPivot, seamGold, gold, portalLight } = buildDoor(radius, lowPower);
     earth.add(door);
 
     const ambient = new THREE.HemisphereLight(0xdde5ef, 0x050607, 1.6);
@@ -231,9 +281,7 @@ export default function PixelEarthIntro({ onComplete }: PixelEarthIntroProps) {
     rim.position.set(-4, 4, 5);
     const side = new THREE.DirectionalLight(0x8a929c, 1.2);
     side.position.set(4, -2, 2);
-    const portalLight = new THREE.PointLight(0xffbd55, 0, 12, 1.5);
-    portalLight.position.set(0, 0, 2.8);
-    scene.add(ambient, rim, side, portalLight);
+    scene.add(ambient, rim, side);
 
     const glow = new THREE.Sprite(new THREE.SpriteMaterial({
       map: (() => {
@@ -255,7 +303,7 @@ export default function PixelEarthIntro({ onComplete }: PixelEarthIntroProps) {
       depthTest: true,
       blending: THREE.AdditiveBlending
     }));
-    glow.position.set(0, 0, 2.28);
+    glow.position.set(0, 0.04, 2.78);
     glow.scale.set(0.25, 1.6, 1);
     earth.add(glow);
 
@@ -287,16 +335,16 @@ export default function PixelEarthIntro({ onComplete }: PixelEarthIntroProps) {
       earth.rotation.z = Math.sin(elapsed * 0.35) * 0.025 * (1 - align);
 
       const portrait = camera.aspect < 0.72;
-      camera.position.z = THREE.MathUtils.lerp(portrait ? 10.2 : 8.2, portrait ? 3.72 : 2.62, push);
+      camera.position.z = THREE.MathUtils.lerp(portrait ? 10.2 : 8.2, portrait ? 2.08 : 1.72, push);
       camera.position.y = THREE.MathUtils.lerp(0.12, -0.03, push);
       camera.fov = THREE.MathUtils.lerp(42, 49, push);
       camera.updateProjectionMatrix();
       camera.lookAt(0, -0.03, 0);
 
-      leftPivot.rotation.y = -open * 1.08;
-      rightPivot.rotation.y = open * 1.08;
-      gold.opacity = light;
-      seam.scale.x = 1 + open * 9;
+      leftPivot.rotation.y = open * THREE.MathUtils.degToRad(88);
+      rightPivot.rotation.y = -open * THREE.MathUtils.degToRad(88);
+      seamGold.opacity = light * (1 - open * 0.72);
+      gold.opacity = light * (0.12 + open * 0.88);
       (glow.material as THREE.SpriteMaterial).opacity = light * 0.7;
       glow.scale.set(0.25 + light * 3.3, 1.4 + light * 3.8, 1);
       portalLight.intensity = light * (lowPower ? 10 : 16);
@@ -339,7 +387,13 @@ export default function PixelEarthIntro({ onComplete }: PixelEarthIntroProps) {
   }, []);
 
   return (
-    <div className={`pixel-earth-intro ${isLeaving ? "is-leaving" : ""}`} role="dialog" aria-label="Website opening animation" aria-modal="true">
+    <div
+      className={`pixel-earth-intro ${isLeaving ? "is-leaving" : ""}`}
+      data-intro-release={INTRO_RELEASE}
+      role="dialog"
+      aria-label="Website opening animation"
+      aria-modal="true"
+    >
       <div ref={mountRef} className="pixel-earth-canvas" aria-hidden="true" />
       <div className="pixel-earth-vignette" aria-hidden="true" />
       <div className="pixel-earth-grain" aria-hidden="true" />
