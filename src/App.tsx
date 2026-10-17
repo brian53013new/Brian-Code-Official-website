@@ -377,6 +377,25 @@ const DetailView = ({ project, lang, ui, onBack }) => {
 
 const changelogEntries = [
   {
+    date: "2026-10-17",
+    version: "0.1.0",
+    title: { zh: "ArtWeather Muse｜資訊卡片詳細資訊視窗", en: "ArtWeather Muse | Information Card Detail Dialog" },
+    sections: {
+      zh: [
+        ["新增功能", ["點擊基本資訊卡，即可查看目前溫度、體感溫度、降雨機率、濕度、天氣摘要與穿搭建議。", "點擊專業資訊中的個別數據卡，可查看該項目前數值與對應說明。"]],
+        ["介面與操作改善", ["新增符合既有設計與六種主題的響應式詳細資訊視窗。", "支援關閉按鈕、點擊背景及 Escape 鍵關閉。", "開啟時會鎖定背景捲動並限制鍵盤焦點；關閉後焦點會返回原本觸發的卡片。", "保留藝術卡原有的預報與專業資訊切換功能，並支援減少動態效果偏好與中英文說明。"]],
+        ["穩定性與效能", ["詳細資訊直接使用已載入的天氣資料，不會新增 API 請求。", "缺少的數值會以破折號顯示，避免無資料時出現錯誤內容。"]],
+        ["版本資訊", ["專案版本為 0.1.0（依目前 package.json）；獨立發布標籤與正式發布狀態待確認。"]]
+      ],
+      en: [
+        ["New features", ["Open a basic information card to view temperature, feels-like temperature, rain probability, humidity, weather summary, and outfit guidance.", "Open an individual professional data card to view its current value and explanation."]],
+        ["Interface and usability", ["Added a responsive detail dialog that follows the existing design and all six visual themes.", "Supports a close button, backdrop click, and Escape key dismissal.", "Opening locks background scrolling and traps keyboard focus; closing restores focus to the triggering card.", "Preserves the art card forecast/professional-information switch and supports reduced motion and bilingual descriptions."]],
+        ["Stability and performance", ["The dialog reuses already-loaded weather data and makes no additional API requests.", "Missing values display an em dash to avoid misleading or broken content."]],
+        ["Version", ["Project version 0.1.0 is based on the current package.json; a standalone release tag and formal release status remain unconfirmed."]]
+      ]
+    }
+  },
+  {
     date: "2026-10-14",
     title: { zh: "吉他和弦網站｜重大功能更新", en: "Guitar Chord Website | Major Feature Update" },
     sections: {
