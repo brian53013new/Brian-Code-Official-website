@@ -1,8 +1,8 @@
 // @ts-nocheck
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 
 const IntroLoadFallback = ({ onComplete }) => {
   useEffect(() => {
@@ -15,219 +15,6 @@ const IntroLoadFallback = ({ onComplete }) => {
 const PixelEarthIntro = React.lazy(() =>
   import("./PixelEarthIntro").catch(() => ({ default: IntroLoadFallback }))
 );
-
-// --- Components ---
-
-// 1. Intro Animation with 3D Wireframe Globe & Expanding Golden Dot
-const IntroAnimation = ({ onComplete }) => {
-  const [bootText, setBootText] = useState([]);
-  const [progress, setProgress] = useState(0);
-  const [matrixLines, setMatrixLines] = useState([]);
-
-  useEffect(() => {
-    // Generate random background matrix numbers
-    const lines = Array.from({ length: 15 }).map(() => {
-      return Array.from({ length: 20 }).map(() => Math.random().toString(16).substring(2, 8).toUpperCase()).join(" ");
-    });
-    setMatrixLines(lines);
-
-    const logs = [
-      "INITIALIZING QUANTUM KERNEL...",
-      "LOADING NEURAL PATHWAYS [████████--] 80%",
-      "ESTABLISHING SECURE CONNECTION TO SATELLITE 7...",
-      "FETCHING PORTFOLIO ASSETS FROM DEEP STORAGE...",
-      "CALIBRATING 3D ENVIRONMENT GEOMETRY...",
-      "IGNITING SUPERNOVA CORE ENGINE...",
-      "SYSTEM FULLY OPERATIONAL. STANDBY FOR JUMP."
-    ];
-    let step = 0;
-    const interval = setInterval(() => {
-      if (step < logs.length) {
-        setBootText(prev => [...prev, logs[step]]);
-        setProgress(Math.floor(((step + 1) / logs.length) * 100));
-        step++;
-      } else {
-        clearInterval(interval);
-      }
-    }, 450);
-    return () => clearInterval(interval);
-  }, []);
-
-  return (
-    <motion.div 
-      className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#020617] overflow-hidden font-mono selection:bg-transparent"
-      initial={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 1.5, ease: "easeInOut" }}
-    >
-      {/* 1. Matrix Background */}
-      <div className="absolute inset-0 flex flex-col justify-between opacity-[0.03] pointer-events-none z-0">
-        {matrixLines.map((line, i) => (
-          <motion.div 
-            key={i} 
-            className="text-[#38BDF8] text-[10px] tracking-[0.5em] whitespace-nowrap"
-            initial={{ x: i % 2 === 0 ? "100%" : "-100%" }}
-            animate={{ x: i % 2 === 0 ? "-10%" : "10%" }}
-            transition={{ duration: 25 + i * 2, repeat: Infinity, ease: "linear" }}
-          >
-            {line}
-          </motion.div>
-        ))}
-      </div>
-
-      {/* 2. Grid Background */}
-      <div className="absolute inset-0 opacity-20 pointer-events-none z-0" style={{ backgroundImage: 'radial-gradient(circle at 50% 50%, #1E3A8A 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
-
-      {/* 3. Boot sequence logs - Top Left */}
-      <div className="absolute top-8 left-8 md:top-12 md:left-12 text-[10px] sm:text-xs text-[#38BDF8] opacity-80 tracking-widest leading-loose pointer-events-none z-20">
-        {bootText.map((text, i) => (
-          <motion.div key={i} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-            <span className="text-[#FFD700] mr-2">{`[${(i * 0.154).toFixed(3)}]`}</span> {`> ${text}`}
-          </motion.div>
-        ))}
-        {progress < 100 && (
-          <motion.div animate={{ opacity: [1, 0] }} transition={{ duration: 0.5, repeat: Infinity }} className="mt-2 text-[#FFD700]">
-            _
-          </motion.div>
-        )}
-      </div>
-
-      {/* 4. Central 3D Assembly (Armillary Sphere + Earth) */}
-      <div style={{ perspective: '1500px' }} className="relative z-10 w-[280px] h-[280px] flex items-center justify-center mt-10 md:mt-0">
-        
-        {/* Outer Ring 1 - Fast */}
-        <motion.div
-          className="absolute w-[160%] h-[160%] rounded-full border-[1px] border-[#38BDF8]/40 border-t-[#38BDF8] shadow-[0_0_15px_rgba(56,189,248,0.2)]"
-          style={{ transformStyle: 'preserve-3d' }}
-          animate={{ rotateX: 360, rotateY: -180, rotateZ: 360 }}
-          transition={{ duration: 6, ease: "linear", repeat: Infinity }}
-        />
-        {/* Outer Ring 2 - Slow */}
-        <motion.div
-          className="absolute w-[135%] h-[135%] rounded-full border-[2px] border-[#1E3A8A]/60 border-b-[#FFD700] border-r-[#FFD700] shadow-[0_0_20px_rgba(255,215,0,0.2)]"
-          style={{ transformStyle: 'preserve-3d' }}
-          animate={{ rotateX: -360, rotateY: 360, rotateZ: -180 }}
-          transition={{ duration: 12, ease: "linear", repeat: Infinity }}
-        />
-        {/* Inner Ring 3 - Dotted */}
-        <motion.div
-          className="absolute w-[115%] h-[115%] rounded-full border-[2px] border-dashed border-[#38BDF8]/50"
-          style={{ transformStyle: 'preserve-3d' }}
-          animate={{ rotateX: 180, rotateY: -360, rotateZ: 180 }}
-          transition={{ duration: 9, ease: "linear", repeat: Infinity }}
-        />
-
-        {/* The Earth Sphere */}
-        <motion.div
-          className="w-full h-full relative"
-          style={{ transformStyle: 'preserve-3d' }}
-          animate={{ rotateY: 360, rotateX: 20 }}
-          transition={{ duration: 6, ease: "linear", repeat: Infinity }}
-        >
-          {/* Earth Meridians (Dark Blue) */}
-          {[0, 30, 60, 90, 120, 150].map((deg) => (
-            <div 
-              key={`v-${deg}`} 
-              className="absolute inset-0 rounded-full border-[3px] border-[#1E3A8A] shadow-[0_0_20px_#1E3A8A]" 
-              style={{ transform: `rotateY(${deg}deg)` }} 
-            />
-          ))}
-          {/* Earth Parallels */}
-          {[-121, -90, -48, 0, 48, 90, 121].map((translate) => {
-            const scale = Math.sqrt(1 - Math.pow(translate / 140, 2));
-            return (
-              <div 
-                key={`h-${translate}`} 
-                className="absolute inset-0 rounded-full border-[3px] border-[#1E3A8A] shadow-[0_0_20px_#1E3A8A]" 
-                style={{ transform: `rotateX(90deg) translateZ(${translate}px) scale(${scale})` }} 
-              />
-            );
-          })}
-
-          {/* The Golden Singularity (Pulses, then disappears at climax) */}
-          <motion.div
-            className="absolute top-1/2 left-1/2 rounded-full"
-            style={{ 
-              width: 24, height: 24, 
-              background: 'radial-gradient(circle, #FFFFFF 0%, #FFD700 40%, #FFA500 100%)', 
-              boxShadow: '0 0 50px #FFD700, 0 0 100px #FFA500',
-            }}
-            initial={{ x: "-50%", y: "-50%", z: 140, scale: 0, opacity: 0 }}
-            animate={{ x: "-50%", y: "-50%", z: 140, scale: [0, 1, 2, 0, 0], opacity: [0, 1, 1, 0, 0] }}
-            transition={{ times: [0, 0.1, 0.75, 0.85, 1], duration: 4.8, ease: "easeInOut" }}
-          >
-             {/* Pulse Rings */}
-             <motion.div 
-               className="absolute inset-0 rounded-full border-2 border-white/80"
-               animate={{ scale: [1, 6], opacity: [1, 0] }}
-               transition={{ duration: 1.2, repeat: 3, delay: 0.5 }}
-             />
-             <motion.div 
-               className="absolute inset-0 rounded-full border-2 border-[#FFD700]/80"
-               animate={{ scale: [1, 4], opacity: [1, 0] }}
-               transition={{ duration: 1, repeat: 3, delay: 0.8 }}
-             />
-          </motion.div>
-        </motion.div>
-      </div>
-
-      {/* 5. Cyberpunk Progress Bar - Bottom Center */}
-      <div className="absolute bottom-16 w-full max-w-md px-8 z-20 flex flex-col items-center">
-        <div className="w-full flex justify-between text-[#38BDF8] text-[10px] tracking-[0.3em] mb-3">
-          <span>SYSTEM_BOOT</span>
-          <span>{progress}%</span>
-        </div>
-        <div className="w-full h-[2px] bg-[#1E3A8A]/30 relative overflow-hidden flex">
-          <motion.div 
-            className="absolute top-0 left-0 h-full bg-gradient-to-r from-[#38BDF8] to-[#FFD700] shadow-[0_0_15px_#FFD700]"
-            initial={{ width: '0%' }}
-            animate={{ width: `${progress}%` }}
-            transition={{ duration: 0.3 }}
-          />
-        </div>
-      </div>
-
-      {/* 6. Light Gathering Implosion (金光從四面八方聚集) */}
-      <motion.div
-        className="fixed top-1/2 left-1/2 pointer-events-none z-40 rounded-full mix-blend-screen"
-        style={{ 
-          width: "150vw", height: "150vw", 
-          x: "-50%", y: "-50%", 
-          border: '10vw solid rgba(255, 215, 0, 0.8)',
-          boxShadow: 'inset 0 0 100px #FFD700, 0 0 100px #FFD700',
-        }}
-        initial={{ scale: 2, opacity: 0 }}
-        animate={{ scale: [2, 2, 0, 0], opacity: [0, 1, 1, 0] }}
-        transition={{ times: [0, 0.6, 0.85, 1], duration: 4.5, ease: "easeIn" }}
-      />
-
-      {/* 7. Supernova Shockwave (向外爆發擴散的精純光芒) */}
-      <motion.div
-        className="fixed top-1/2 left-1/2 pointer-events-none z-50 rounded-full mix-blend-screen"
-        style={{
-          width: "300vw", height: "300vw",
-          x: "-50%", y: "-50%",
-          background: 'radial-gradient(circle, #FFFFFF 0%, #FFD700 20%, #FFA500 40%, transparent 70%)',
-        }}
-        initial={{ scale: 0, opacity: 0 }}
-        // 停留在 scale 1 (即佔滿螢幕) 與 opacity 1
-        animate={{ scale: [0, 0, 1, 1], opacity: [0, 0, 1, 1] }}
-        transition={{ times: [0, 0.85, 0.95, 1], duration: 4.5, ease: "easeOut" }}
-      />
-
-      {/* 8. Backup Fullscreen Flash (絕對白金化，覆蓋整個螢幕直到動畫結束) */}
-      <motion.div
-        className="fixed inset-0 pointer-events-none z-[60]"
-        style={{ background: 'radial-gradient(circle, #FFFFFF 0%, #FFD700 100%)' }}
-        initial={{ opacity: 0 }}
-        // 停留在 opacity 1，直到外層元件觸發 exit 淡出
-        animate={{ opacity: [0, 0, 1, 1] }}
-        transition={{ times: [0, 0.86, 0.95, 1], duration: 4.5, ease: "easeOut" }}
-        onAnimationComplete={() => onComplete()}
-      />
-    </motion.div>
-  );
-};
 
 const projectsData = [
   {
@@ -387,7 +174,60 @@ const DetailView = ({ project, lang, ui, onBack }) => {
   );
 };
 
+const GUITAR_HELPER_RELEASE = {
+  siteId: "guitar-helper-gm",
+  siteName: "吉他幫手 GM",
+  version: "1.2.0",
+  releasedAt: null,
+  status: "draft",
+  summary: "以更直覺的琴弦控制與智慧加音，讓和弦探索、指法比較與試聽流程更簡單。",
+  highlights: [
+    "和弦分類與爵士 Rootless Voicing 理論整理。",
+    "六條琴弦改為獨立包含／排除切換，並提供友好指法。",
+    "加音模擬器可輸入音名或音程，自動尋找可演奏位置。",
+    "收藏、最近瀏覽、指法比較、多重查詢與六種風格整合。"
+  ],
+  improvements: [
+    "精簡詳細指法操作列，並改善桌面與手機指板操作。",
+    "加音後同步更新和弦名稱、指板、替代把位與播放。"
+  ],
+  fixes: [
+    "移除聽辨選擇題、答題統計及舊答案狀態流程。"
+  ],
+  officialReleaseUrl: "https://brian53013new.github.io/Brian-Code-Official-website/#changelog"
+};
+
+const IS_PREVIEW_BUILD = typeof window !== "undefined" && (
+  import.meta.env.DEV || window.location.hostname.endsWith(".chatgpt.site")
+);
+const SHOW_GUITAR_HELPER_RELEASE = GUITAR_HELPER_RELEASE.status === "published" ||
+  (IS_PREVIEW_BUILD && ["draft", "approved"].includes(GUITAR_HELPER_RELEASE.status));
+
+const guitarHelperReleaseEntry = {
+  date: GUITAR_HELPER_RELEASE.releasedAt,
+  version: GUITAR_HELPER_RELEASE.version,
+  status: GUITAR_HELPER_RELEASE.status,
+  title: { zh: "吉他幫手 GM｜整體更新", en: "Guitar Helper GM | Feature Update" },
+  sections: {
+    zh: [
+      ["和弦資料與理論", ["重新整理基本、延伸、變化與加音和弦分類，擴充六、七、九和弦、掛留、半減與變化屬和弦。", "支援 Rootless Voicing，優先保留三音、七音及關鍵色彩音，並改善和弦名稱、組成音與音程分析一致性。"]],
+      ["指法與互動指板", ["主要功能共用互動指板及指法資料；和弦頁採智慧把位範圍，並保留音符點擊、音名／度數顯示及吉他／鋼琴播放。", "六條琴弦改為簡單的包含／排除切換，指法切換改為並排按鈕並顯示目前數量；友好模式優先提供小跨度指法。"]],
+      ["和弦操作與個人工具", ["新增收藏和弦、最近瀏覽及指法比較；多重和弦查詢支援排序、刪除、播放、收藏、比較、轉調與移調夾。", "收藏、最近瀏覽與風格設定保存在瀏覽器。"]],
+      ["智慧加音模擬器", ["支援 A–G 音名、升降記號及音級／音程輸入，自動尋找可演奏位置，不必手動指定琴弦與琴格。", "加音後同步更新和弦名稱、組成音、指板、替代把位與播放，也可進入詳細指法頁調整配置。"]],
+      ["介面與修正", ["詳細和弦頁改為可水平滑動的圖示操作列，並改善桌面與手機指板操作及狀態回饋。", "六種風格維持可選；移除聽辨選擇題、答題統計與舊答案狀態，保留指板點音、和弦試聽、比較及轉調播放。"]]
+    ],
+    en: [
+      ["Chord data and theory", ["Restructured basic, extended, altered, and added-tone chord categories and expanded sixth, seventh, ninth, suspended, half-diminished, and altered-dominant types.", "Added Rootless Voicing that prioritizes thirds, sevenths, and essential color tones, with more consistent chord names, pitch content, and interval analysis."]],
+      ["Voicings and interactive fretboard", ["Major features share the same interactive fretboard and voicing data; chord pages use a focused fret range while retaining note taps, note/degree labels, and guitar/piano playback.", "Six strings now use simple independent include/exclude toggles. Compact voicing controls show the current count, and friendly mode favors smaller stretches."]],
+      ["Chord tools", ["Added saved chords, recent history, and voicing comparison. Multi-chord lookup supports reorder, remove, playback, save, compare, transposition, and capo settings.", "Favorites, recent history, and style preferences persist in the browser."]],
+      ["Smart added-tone simulator", ["Enter note names (A–G with accidentals) or scale degrees/intervals; the simulator finds playable positions automatically.", "Added tones update chord names, pitch content, fretboard, alternate voicings, and playback, with further string and fret choices in detail view."]],
+      ["Interface and fixes", ["The chord detail toolbar is now compact, icon-led, and horizontally scrollable, with improved desktop/mobile fretboard interaction and feedback.", "Retained all six styles and shared audio tools while removing the ear-training quiz, score statistics, and stale answer state."]]
+    ]
+  }
+};
+
 const changelogEntries = [
+  ...(SHOW_GUITAR_HELPER_RELEASE ? [guitarHelperReleaseEntry] : []),
   {
     date: "2026-10-17",
     version: "0.1.0",
@@ -474,9 +314,14 @@ const changelogEntries = [
       en: [["Website and portfolio", ["Integrated Guitar Advisor into the portfolio.", "Rebuilt the site architecture with a 3D intro and card-based directory.", "Migrated to Vite + React for more reliable static deployment and loading."]]]
     }
   }
-].sort((a, b) => b.date.localeCompare(a.date));
+].sort((a, b) => {
+  if (!a.date) return -1;
+  if (!b.date) return 1;
+  return b.date.localeCompare(a.date);
+});
 
 const formatDate = (date, lang) => {
+  if (!date) return lang === "zh" ? "待公布" : "To be announced";
   const [year, month, day] = date.split("-");
   return lang === "zh" ? `${year} 年 ${month} 月 ${day} 日` : `${year}-${month}-${day}`;
 };
@@ -507,11 +352,13 @@ const UpdateLogModal = ({ onClose, lang }) => {
 
         <div className="space-y-5 relative z-10 max-h-[65vh] overflow-y-auto pr-2 md:pr-4 pb-6">
           {changelogEntries.map((entry, index) => (
-            <details key={entry.date} open={index === 0} className="theme-card changelog-entry rounded-xl border p-5 md:p-6">
+            <details key={`${entry.version || "release"}-${entry.date || "pending"}-${index}`} open={index === 0} className="theme-card changelog-entry rounded-xl border p-5 md:p-6">
               <summary className="cursor-pointer list-none pr-8 relative">
                 <h3 className="text-lg md:text-xl font-serif font-bold">{entry.title[lang]}</h3>
                 <p className="theme-accent-text mt-2 text-xs md:text-sm font-sans tracking-wider">
-                  {lang === "zh" ? "發布日期：" : "Published: "}{formatDate(entry.date, lang)}
+                  {entry.status === "draft"
+                    ? (lang === "zh" ? `v${entry.version}｜草稿審核中｜日期：` : `v${entry.version} | Draft review | Date: `)
+                    : (lang === "zh" ? "發布日期：" : "Published: ")}{formatDate(entry.date, lang)}
                 </p>
               </summary>
               <div className="mt-6 space-y-6">
@@ -531,6 +378,116 @@ const UpdateLogModal = ({ onClose, lang }) => {
     </motion.div>
   );
 };
+
+const ReleaseDigestModal = ({ lang, onClose, onReadFull }) => {
+  const dialogRef = useRef(null);
+  const closeButtonRef = useRef(null);
+  const reduceMotion = useReducedMotion();
+
+  useEffect(() => {
+    const previousFocus = document.activeElement;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    closeButtonRef.current?.focus();
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onClose();
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const focusable = dialogRef.current?.querySelectorAll(
+        'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      if (!focusable?.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+      if (previousFocus instanceof HTMLElement) previousFocus.focus({ preventScroll: true });
+    };
+  }, [onClose]);
+
+  const highlights = lang === "zh"
+    ? GUITAR_HELPER_RELEASE.highlights
+    : [
+        "Refined chord families and jazz Rootless Voicing support.",
+        "Simplified six-string include/exclude controls and compact voicing navigation.",
+        "Enter a note or interval and let the added-tone simulator find playable positions.",
+        "Combined favorites, recent history, voicing comparison, multi-chord tools, and six styles."
+      ];
+
+  return (
+    <motion.div
+      className="fixed inset-0 z-[250] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm font-sans"
+      initial={reduceMotion ? false : { opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={reduceMotion ? undefined : { opacity: 0 }}
+      onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}
+    >
+      <motion.section
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="release-digest-title"
+        aria-describedby="release-digest-summary"
+        className="theme-modal relative w-full max-w-2xl p-6 md:p-10 border shadow-2xl overflow-y-auto max-h-[90vh]"
+        initial={reduceMotion ? false : { scale: 0.96, y: 16 }}
+        animate={{ scale: 1, y: 0 }}
+        exit={reduceMotion ? undefined : { scale: 0.98, y: 8 }}
+        transition={reduceMotion ? { duration: 0 } : { duration: 0.28 }}
+      >
+        <button
+          ref={closeButtonRef}
+          type="button"
+          onClick={onClose}
+          aria-label={lang === "zh" ? "稍後再看並關閉" : "Close and read later"}
+          className="absolute top-4 right-4 w-10 h-10 rounded-full border theme-control text-2xl leading-none"
+        >
+          &times;
+        </button>
+        <p className="theme-accent-text text-xs tracking-[0.2em] uppercase pr-12">{GUITAR_HELPER_RELEASE.siteName} · v{GUITAR_HELPER_RELEASE.version}</p>
+        <p className="mt-4 inline-flex rounded-full border px-3 py-1 text-xs theme-accent-text">
+          {lang === "zh" ? "草稿預覽｜PR 審核中｜發布日期待公布" : "Draft preview | PR review pending | Release date pending"}
+        </p>
+        <h2 id="release-digest-title" className="text-3xl md:text-4xl font-serif mt-4 mb-3">
+          {lang === "zh" ? "吉他幫手更新懶人包" : "What’s new in Guitar Helper GM"}
+        </h2>
+        <p id="release-digest-summary" className="text-sm md:text-base leading-relaxed opacity-80 mb-6">
+          {lang === "zh" ? GUITAR_HELPER_RELEASE.summary : "Explore chords, voicings, and added tones through a clearer and more connected guitar workflow."}
+        </p>
+        <ul className="space-y-3 mb-8">
+          {highlights.map((item) => (
+            <li key={item} className="flex gap-3 text-sm md:text-base leading-relaxed">
+              <span className="theme-accent-text" aria-hidden="true">◆</span><span>{item}</span>
+            </li>
+          ))}
+        </ul>
+        <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between border-t theme-border pt-5">
+          <span className="text-xs opacity-70">{lang === "zh" ? "尚未合併或正式發布。" : "Not merged or officially released yet."}</span>
+          <a
+            href={GUITAR_HELPER_RELEASE.officialReleaseUrl}
+            onClick={(event) => { event.preventDefault(); onReadFull(); }}
+            className="theme-primary-button inline-flex justify-center rounded-full px-5 py-3 text-xs font-bold tracking-wide"
+          >
+            {lang === "zh" ? "查看官網完整更新紀錄" : "Read the full official update log"}
+          </a>
+        </div>
+      </motion.section>
+    </motion.div>
+  );
+}
 
 // --- Main Page ---
 const themeOptions = [
@@ -555,12 +512,36 @@ export default function Home() {
   const [currentView, setCurrentView] = useState<"home" | "detail">("home");
   const [activeProjectId, setActiveProjectId] = useState<string>("guitar-advisor");
   const [showLog, setShowLog] = useState(false);
+  const [showReleaseDigest, setShowReleaseDigest] = useState(false);
   const mainRef = useRef<HTMLElement>(null);
 
   const completeIntro = () => {
     setShowIntro(false);
-    window.requestAnimationFrame(() => mainRef.current?.focus({ preventScroll: true }));
+    window.requestAnimationFrame(() => {
+      mainRef.current?.focus({ preventScroll: true });
+      if (!SHOW_GUITAR_HELPER_RELEASE) return;
+      try {
+        if (window.localStorage.getItem(`brian-code-release-${GUITAR_HELPER_RELEASE.siteId}-${GUITAR_HELPER_RELEASE.version}`) !== "read") {
+          setShowReleaseDigest(true);
+        }
+      } catch (_) {
+        setShowReleaseDigest(true);
+      }
+    });
   };
+
+  const closeReleaseDigest = useCallback(() => {
+    try {
+      window.localStorage.setItem(`brian-code-release-${GUITAR_HELPER_RELEASE.siteId}-${GUITAR_HELPER_RELEASE.version}`, "read");
+    } catch (_) {}
+    setShowReleaseDigest(false);
+  }, []);
+
+  const readFullRelease = useCallback(() => {
+    window.history.replaceState(null, "", "#changelog");
+    closeReleaseDigest();
+    setShowLog(true);
+  }, [closeReleaseDigest]);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -594,6 +575,12 @@ export default function Home() {
 
       <AnimatePresence>
         {showLog && <UpdateLogModal onClose={() => setShowLog(false)} lang={lang} />}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showReleaseDigest && (
+          <ReleaseDigestModal lang={lang} onClose={closeReleaseDigest} onReadFull={readFullRelease} />
+        )}
       </AnimatePresence>
 
       <main ref={mainRef} tabIndex={-1} data-theme={theme} className="theme-shell min-h-screen transition-colors duration-500 overflow-x-hidden relative flex flex-col focus:outline-none">
@@ -653,7 +640,15 @@ export default function Home() {
         {/* Footer */}
         <footer className="theme-border p-6 text-center text-xs font-sans tracking-widest opacity-80 relative z-30 flex flex-col items-center gap-4 border-t">
           <div>{ui.footer[lang]}</div>
-          <div className="flex gap-4 items-center">
+          <div id="changelog" className="flex gap-4 items-center">
+            {SHOW_GUITAR_HELPER_RELEASE && (
+              <button
+                onClick={() => setShowReleaseDigest(true)}
+                className="theme-control px-4 py-2 rounded-full border transition-colors"
+              >
+                {lang === "zh" ? `更新懶人包 v${GUITAR_HELPER_RELEASE.version}` : `What’s new v${GUITAR_HELPER_RELEASE.version}`}
+              </button>
+            )}
             <button 
               onClick={() => setShowLog(true)}
               className="theme-control px-4 py-2 rounded-full border transition-colors"
