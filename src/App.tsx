@@ -1,8 +1,8 @@
 // @ts-nocheck
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 
 const IntroLoadFallback = ({ onComplete }) => {
   useEffect(() => {
@@ -174,7 +174,60 @@ const DetailView = ({ project, lang, ui, onBack }) => {
   );
 };
 
+const GUITAR_HELPER_RELEASE = {
+  siteId: "guitar-helper-gm",
+  siteName: "吉他幫手 GM",
+  version: "1.2.0",
+  releasedAt: null,
+  status: "draft",
+  summary: "以更直覺的琴弦控制與智慧加音，讓和弦探索、指法比較與試聽流程更簡單。",
+  highlights: [
+    "和弦分類與爵士 Rootless Voicing 理論整理。",
+    "六條琴弦改為獨立包含／排除切換，並提供友好指法。",
+    "加音模擬器可輸入音名或音程，自動尋找可演奏位置。",
+    "收藏、最近瀏覽、指法比較、多重查詢與六種風格整合。"
+  ],
+  improvements: [
+    "精簡詳細指法操作列，並改善桌面與手機指板操作。",
+    "加音後同步更新和弦名稱、指板、替代把位與播放。"
+  ],
+  fixes: [
+    "移除聽辨選擇題、答題統計及舊答案狀態流程。"
+  ],
+  officialReleaseUrl: "https://brian53013new.github.io/Brian-Code-Official-website/#changelog"
+};
+
+const IS_PREVIEW_BUILD = typeof window !== "undefined" && (
+  import.meta.env.DEV || window.location.hostname.endsWith(".chatgpt.site")
+);
+const SHOW_GUITAR_HELPER_RELEASE = GUITAR_HELPER_RELEASE.status === "published" ||
+  (IS_PREVIEW_BUILD && ["draft", "approved"].includes(GUITAR_HELPER_RELEASE.status));
+
+const guitarHelperReleaseEntry = {
+  date: GUITAR_HELPER_RELEASE.releasedAt,
+  version: GUITAR_HELPER_RELEASE.version,
+  status: GUITAR_HELPER_RELEASE.status,
+  title: { zh: "吉他幫手 GM｜整體更新", en: "Guitar Helper GM | Feature Update" },
+  sections: {
+    zh: [
+      ["和弦資料與理論", ["重新整理基本、延伸、變化與加音和弦分類，擴充六、七、九和弦、掛留、半減與變化屬和弦。", "支援 Rootless Voicing，優先保留三音、七音及關鍵色彩音，並改善和弦名稱、組成音與音程分析一致性。"]],
+      ["指法與互動指板", ["主要功能共用互動指板及指法資料；和弦頁採智慧把位範圍，並保留音符點擊、音名／度數顯示及吉他／鋼琴播放。", "六條琴弦改為簡單的包含／排除切換，指法切換改為並排按鈕並顯示目前數量；友好模式優先提供小跨度指法。"]],
+      ["和弦操作與個人工具", ["新增收藏和弦、最近瀏覽及指法比較；多重和弦查詢支援排序、刪除、播放、收藏、比較、轉調與移調夾。", "收藏、最近瀏覽與風格設定保存在瀏覽器。"]],
+      ["智慧加音模擬器", ["支援 A–G 音名、升降記號及音級／音程輸入，自動尋找可演奏位置，不必手動指定琴弦與琴格。", "加音後同步更新和弦名稱、組成音、指板、替代把位與播放，也可進入詳細指法頁調整配置。"]],
+      ["介面與修正", ["詳細和弦頁改為可水平滑動的圖示操作列，並改善桌面與手機指板操作及狀態回饋。", "六種風格維持可選；移除聽辨選擇題、答題統計與舊答案狀態，保留指板點音、和弦試聽、比較及轉調播放。"]]
+    ],
+    en: [
+      ["Chord data and theory", ["Restructured basic, extended, altered, and added-tone chord categories and expanded sixth, seventh, ninth, suspended, half-diminished, and altered-dominant types.", "Added Rootless Voicing that prioritizes thirds, sevenths, and essential color tones, with more consistent chord names, pitch content, and interval analysis."]],
+      ["Voicings and interactive fretboard", ["Major features share the same interactive fretboard and voicing data; chord pages use a focused fret range while retaining note taps, note/degree labels, and guitar/piano playback.", "Six strings now use simple independent include/exclude toggles. Compact voicing controls show the current count, and friendly mode favors smaller stretches."]],
+      ["Chord tools", ["Added saved chords, recent history, and voicing comparison. Multi-chord lookup supports reorder, remove, playback, save, compare, transposition, and capo settings.", "Favorites, recent history, and style preferences persist in the browser."]],
+      ["Smart added-tone simulator", ["Enter note names (A–G with accidentals) or scale degrees/intervals; the simulator finds playable positions automatically.", "Added tones update chord names, pitch content, fretboard, alternate voicings, and playback, with further string and fret choices in detail view."]],
+      ["Interface and fixes", ["The chord detail toolbar is now compact, icon-led, and horizontally scrollable, with improved desktop/mobile fretboard interaction and feedback.", "Retained all six styles and shared audio tools while removing the ear-training quiz, score statistics, and stale answer state."]]
+    ]
+  }
+};
+
 const changelogEntries = [
+  ...(SHOW_GUITAR_HELPER_RELEASE ? [guitarHelperReleaseEntry] : []),
   {
     date: "2026-10-17",
     version: "0.1.0",
@@ -261,9 +314,14 @@ const changelogEntries = [
       en: [["Website and portfolio", ["Integrated Guitar Advisor into the portfolio.", "Rebuilt the site architecture with a 3D intro and card-based directory.", "Migrated to Vite + React for more reliable static deployment and loading."]]]
     }
   }
-].sort((a, b) => b.date.localeCompare(a.date));
+].sort((a, b) => {
+  if (!a.date) return -1;
+  if (!b.date) return 1;
+  return b.date.localeCompare(a.date);
+});
 
 const formatDate = (date, lang) => {
+  if (!date) return lang === "zh" ? "待公布" : "To be announced";
   const [year, month, day] = date.split("-");
   return lang === "zh" ? `${year} 年 ${month} 月 ${day} 日` : `${year}-${month}-${day}`;
 };
@@ -294,11 +352,13 @@ const UpdateLogModal = ({ onClose, lang }) => {
 
         <div className="space-y-5 relative z-10 max-h-[65vh] overflow-y-auto pr-2 md:pr-4 pb-6">
           {changelogEntries.map((entry, index) => (
-            <details key={entry.date} open={index === 0} className="theme-card changelog-entry rounded-xl border p-5 md:p-6">
+            <details key={`${entry.version || "release"}-${entry.date || "pending"}-${index}`} open={index === 0} className="theme-card changelog-entry rounded-xl border p-5 md:p-6">
               <summary className="cursor-pointer list-none pr-8 relative">
                 <h3 className="text-lg md:text-xl font-serif font-bold">{entry.title[lang]}</h3>
                 <p className="theme-accent-text mt-2 text-xs md:text-sm font-sans tracking-wider">
-                  {lang === "zh" ? "發布日期：" : "Published: "}{formatDate(entry.date, lang)}
+                  {entry.status === "draft"
+                    ? (lang === "zh" ? `v${entry.version}｜草稿審核中｜日期：` : `v${entry.version} | Draft review | Date: `)
+                    : (lang === "zh" ? "發布日期：" : "Published: ")}{formatDate(entry.date, lang)}
                 </p>
               </summary>
               <div className="mt-6 space-y-6">
@@ -318,6 +378,116 @@ const UpdateLogModal = ({ onClose, lang }) => {
     </motion.div>
   );
 };
+
+const ReleaseDigestModal = ({ lang, onClose, onReadFull }) => {
+  const dialogRef = useRef(null);
+  const closeButtonRef = useRef(null);
+  const reduceMotion = useReducedMotion();
+
+  useEffect(() => {
+    const previousFocus = document.activeElement;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    closeButtonRef.current?.focus();
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onClose();
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const focusable = dialogRef.current?.querySelectorAll(
+        'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      if (!focusable?.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+      if (previousFocus instanceof HTMLElement) previousFocus.focus({ preventScroll: true });
+    };
+  }, [onClose]);
+
+  const highlights = lang === "zh"
+    ? GUITAR_HELPER_RELEASE.highlights
+    : [
+        "Refined chord families and jazz Rootless Voicing support.",
+        "Simplified six-string include/exclude controls and compact voicing navigation.",
+        "Enter a note or interval and let the added-tone simulator find playable positions.",
+        "Combined favorites, recent history, voicing comparison, multi-chord tools, and six styles."
+      ];
+
+  return (
+    <motion.div
+      className="fixed inset-0 z-[250] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm font-sans"
+      initial={reduceMotion ? false : { opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={reduceMotion ? undefined : { opacity: 0 }}
+      onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}
+    >
+      <motion.section
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="release-digest-title"
+        aria-describedby="release-digest-summary"
+        className="theme-modal relative w-full max-w-2xl p-6 md:p-10 border shadow-2xl overflow-y-auto max-h-[90vh]"
+        initial={reduceMotion ? false : { scale: 0.96, y: 16 }}
+        animate={{ scale: 1, y: 0 }}
+        exit={reduceMotion ? undefined : { scale: 0.98, y: 8 }}
+        transition={reduceMotion ? { duration: 0 } : { duration: 0.28 }}
+      >
+        <button
+          ref={closeButtonRef}
+          type="button"
+          onClick={onClose}
+          aria-label={lang === "zh" ? "稍後再看並關閉" : "Close and read later"}
+          className="absolute top-4 right-4 w-10 h-10 rounded-full border theme-control text-2xl leading-none"
+        >
+          &times;
+        </button>
+        <p className="theme-accent-text text-xs tracking-[0.2em] uppercase pr-12">{GUITAR_HELPER_RELEASE.siteName} · v{GUITAR_HELPER_RELEASE.version}</p>
+        <p className="mt-4 inline-flex rounded-full border px-3 py-1 text-xs theme-accent-text">
+          {lang === "zh" ? "草稿預覽｜PR 審核中｜發布日期待公布" : "Draft preview | PR review pending | Release date pending"}
+        </p>
+        <h2 id="release-digest-title" className="text-3xl md:text-4xl font-serif mt-4 mb-3">
+          {lang === "zh" ? "吉他幫手更新懶人包" : "What’s new in Guitar Helper GM"}
+        </h2>
+        <p id="release-digest-summary" className="text-sm md:text-base leading-relaxed opacity-80 mb-6">
+          {lang === "zh" ? GUITAR_HELPER_RELEASE.summary : "Explore chords, voicings, and added tones through a clearer and more connected guitar workflow."}
+        </p>
+        <ul className="space-y-3 mb-8">
+          {highlights.map((item) => (
+            <li key={item} className="flex gap-3 text-sm md:text-base leading-relaxed">
+              <span className="theme-accent-text" aria-hidden="true">◆</span><span>{item}</span>
+            </li>
+          ))}
+        </ul>
+        <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between border-t theme-border pt-5">
+          <span className="text-xs opacity-70">{lang === "zh" ? "尚未合併或正式發布。" : "Not merged or officially released yet."}</span>
+          <a
+            href={GUITAR_HELPER_RELEASE.officialReleaseUrl}
+            onClick={(event) => { event.preventDefault(); onReadFull(); }}
+            className="theme-primary-button inline-flex justify-center rounded-full px-5 py-3 text-xs font-bold tracking-wide"
+          >
+            {lang === "zh" ? "查看官網完整更新紀錄" : "Read the full official update log"}
+          </a>
+        </div>
+      </motion.section>
+    </motion.div>
+  );
+}
 
 // --- Main Page ---
 const themeOptions = [
@@ -342,12 +512,36 @@ export default function Home() {
   const [currentView, setCurrentView] = useState<"home" | "detail">("home");
   const [activeProjectId, setActiveProjectId] = useState<string>("guitar-advisor");
   const [showLog, setShowLog] = useState(false);
+  const [showReleaseDigest, setShowReleaseDigest] = useState(false);
   const mainRef = useRef<HTMLElement>(null);
 
   const completeIntro = () => {
     setShowIntro(false);
-    window.requestAnimationFrame(() => mainRef.current?.focus({ preventScroll: true }));
+    window.requestAnimationFrame(() => {
+      mainRef.current?.focus({ preventScroll: true });
+      if (!SHOW_GUITAR_HELPER_RELEASE) return;
+      try {
+        if (window.localStorage.getItem(`brian-code-release-${GUITAR_HELPER_RELEASE.siteId}-${GUITAR_HELPER_RELEASE.version}`) !== "read") {
+          setShowReleaseDigest(true);
+        }
+      } catch (_) {
+        setShowReleaseDigest(true);
+      }
+    });
   };
+
+  const closeReleaseDigest = useCallback(() => {
+    try {
+      window.localStorage.setItem(`brian-code-release-${GUITAR_HELPER_RELEASE.siteId}-${GUITAR_HELPER_RELEASE.version}`, "read");
+    } catch (_) {}
+    setShowReleaseDigest(false);
+  }, []);
+
+  const readFullRelease = useCallback(() => {
+    window.history.replaceState(null, "", "#changelog");
+    closeReleaseDigest();
+    setShowLog(true);
+  }, [closeReleaseDigest]);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -381,6 +575,12 @@ export default function Home() {
 
       <AnimatePresence>
         {showLog && <UpdateLogModal onClose={() => setShowLog(false)} lang={lang} />}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showReleaseDigest && (
+          <ReleaseDigestModal lang={lang} onClose={closeReleaseDigest} onReadFull={readFullRelease} />
+        )}
       </AnimatePresence>
 
       <main ref={mainRef} tabIndex={-1} data-theme={theme} className="theme-shell min-h-screen transition-colors duration-500 overflow-x-hidden relative flex flex-col focus:outline-none">
@@ -440,7 +640,15 @@ export default function Home() {
         {/* Footer */}
         <footer className="theme-border p-6 text-center text-xs font-sans tracking-widest opacity-80 relative z-30 flex flex-col items-center gap-4 border-t">
           <div>{ui.footer[lang]}</div>
-          <div className="flex gap-4 items-center">
+          <div id="changelog" className="flex gap-4 items-center">
+            {SHOW_GUITAR_HELPER_RELEASE && (
+              <button
+                onClick={() => setShowReleaseDigest(true)}
+                className="theme-control px-4 py-2 rounded-full border transition-colors"
+              >
+                {lang === "zh" ? `更新懶人包 v${GUITAR_HELPER_RELEASE.version}` : `What’s new v${GUITAR_HELPER_RELEASE.version}`}
+              </button>
+            )}
             <button 
               onClick={() => setShowLog(true)}
               className="theme-control px-4 py-2 rounded-full border transition-colors"
